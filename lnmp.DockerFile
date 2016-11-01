@@ -5,6 +5,7 @@ RUN apt-get install -y nginx
 RUN echo 'Hi, I am in your container'  > /usr/share/nginx/html/index.html
 
 RUN apt-get install -y php5-dev libpcre3-dev gcc make php5-mysql php5-fpm php5-cli
+RUN apt-get install -y git
 RUN git clone git://github.com/phalcon/cphalcon.git  cphalcon\
 	cd cphalcon/build \
 	sudo ./install \
