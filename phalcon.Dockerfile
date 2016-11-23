@@ -20,5 +20,6 @@ RUN apt-get install -y php5-redis
 RUN apt-get install -y re2c 
 RUN apt-get install -y php5-json 
 RUN apt-get install -y php5-gd
+RUN apt-get install -y php5-curl
 
 EXPOSE 80
