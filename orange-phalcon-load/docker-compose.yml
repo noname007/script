@@ -1,0 +1,33 @@
+version: '2'
+
+services:
+    mysql:
+        restart: always
+        image: mysql:5.6
+        volumes:
+            - D:/docker/orange-phalcon-load/mysql:/var/lib/mysql
+        environment:
+            - MYSQL_ROOT_PASSWORD=111111
+        ports:
+            - "3306:3306"
+
+    php-phalcon:
+        restart: always
+        image: soul11201/phalcon_debug
+        volumes:
+            - D:/code/svn/health_v1:/app
+            - D:/tools/cphalcon:/source/phalcon
+            - D:/tools/phpdebug:/tmp/xdebug
+            - D:/tools/zephir:/source/zephir
+        ports:
+            - "12346:80"
+
+    orange:
+        restart: always
+        image: syhily/orange
+        depends_on:
+            - mysql
+        ports:
+            - "7777:7777"
+            - "8888:8888"
+            - "9999:9999"
