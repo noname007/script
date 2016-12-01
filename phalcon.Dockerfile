@@ -23,3 +23,5 @@ RUN apt-get install -y php5-gd
 RUN apt-get install -y php5-curl
 
 EXPOSE 80
+
+ENTRYPOINT ["/usr/bin/php","-S","0.0.0.0:80","-t", "/app/public","/app/.htrouter.php"]
