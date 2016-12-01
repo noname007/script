@@ -1,0 +1,30 @@
+version: '2'
+
+services:
+  nginx:
+    restart: always
+    image: nginx:1.10.2
+    add: nginx.conf /etc/nginx/nginx.conf
+  postgresql:
+    restart: always
+    image: sameersbn/postgresql:9.5-3
+    volumes:
+    - /srv/docker/gitlab/postgresql:/var/lib/postgresql:Z
+    environment:
+    - DB_USER=gitlab
+    - DB_PASS=password
+    - DB_NAME=gitlabhq_production
+    - DB_EXTENSION=pg_trgm
+
+  gitlab:
+    restart: always
+    image: sameersbn/gitlab:8.13.5
+    depends_on:
+    - redis
+    - postgresql
+    ports:
+    - "10080:80"
+    - "10022:22"
+    volumes:
+    - /srv/docker/gitlab/gitlab:/home/git/data:Z
+    environment:
