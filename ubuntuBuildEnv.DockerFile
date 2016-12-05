@@ -24,3 +24,5 @@ RUN apt-get install -y  autoconf automake libtool cmake
 
 RUN apt-get install -y re2c flex bison
 
+RUN apt-get  install -y tree
+
