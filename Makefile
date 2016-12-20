@@ -14,7 +14,7 @@ openresty: prerequisites
 	test -d 'openresty-1.11.2.2' || tar -zxvf openresty-1.11.2.2.tar.gz 
 	test -d $(OEPNRESTY_PATH) || (\
 	 cd openresty-1.11.2.2 &&\
-	./configure --prefix=$(OEPNRESTY_PATH) --with-pcre-jit --with-ipv6 -j2  &&\
+	./configure --prefix=$(OEPNRESTY_PATH) --with-pcre-jit --with-ipv6 --with-http_gzip_static_module    --with-http_stub_status_module -j2 &&\
 	make -j2 &&\
 	sudo make install &&\
 	echo 'PATH=$(OEPNRESTY_PATH)/bin:$$PATH'>> ~/.bashrc && source ~/.bashrc  \
