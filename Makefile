@@ -5,9 +5,7 @@ prerequisites:
 	yum install -y readline-devel pcre-devel openssl-devel gcc wget \
 				icu libicu libicu-devel \
 				autoconf libjpeg-dev libpng-dev libmcrypt-dev  bzip2 libbz2-dev curl libcurl4-gnutls-dev libfreetype6-dev  libxml2-devel gd-devel libmcrypt-devel libcurl-devel \
-				libuuid-devel \
-
-
+				libuuid-devel  bzip2-devel gcc-c++\
 
 openresty: prerequisites
 	test -f 'openresty-1.11.2.2.tar.gz' || wget https://openresty.org/download/openresty-1.11.2.2.tar.gz 
