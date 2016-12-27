@@ -56,7 +56,7 @@ php7-ext-redis: php7
 	echo "extension=redis.so" >> $(PHP_PATH)/lib/php.ini
 
 php7-ext-phalcon: php7
-	test -d "cphalcon"|| git clone git://github.com/phalcon/cphalcon.git
+	test -d "cphalcon"|| git clone git://github.com/thisverygoodhhhh/cphalcon.git
 	source ~/.bashrc &&\
 	echo $$PATH && \
 	cd cphalcon/build && \
