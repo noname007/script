@@ -1,6 +1,9 @@
 PHP_PATH= $(shell pwd)/software/php7.0.14dd
 OEPNRESTY_PATH= $(shell pwd)/software/openrestydd
 
+export PATH := $(PHP_PATH)/bin:$PATH
+export PATH := $(OEPNRESTY_PATH)/bin:$PATH
+
 prerequisites:
 # 	yum install -y readline-devel pcre-devel openssl-devel gcc wget && \
 # 				icu libicu libicu-devel && \
@@ -79,7 +82,7 @@ php-composer:
 
 
 php-amqp: librabbitmq
-	test -d "amqp-1.7.1.tgz" ||  wget https://pecl.php.net/get/amqp-1.7.1.tgz
+	test -d "amqp-1.7.1.tgz"||test -d "amqp-1.7.1" ||  wget https://pecl.php.net/get/amqp-1.7.1.tgz
 	test -d "amqp-1.7.1" ||( tar -zxvf amqp-1.7.1.tgz  &&\
 	cd amqp-1.7.1 && \
 	phpize  && \
@@ -99,6 +102,9 @@ librabbitmq:
 	./configure && \
 	mkdir build && cd build && \
 	cmake .. && \
-	cmake --build .  --target install )\
+	sudo cmake --build .  --target install  &&\
+	sudo sh -c 'echo "/usr/local/lib/x86_64-linux-gnu"  >> /etc/ld.so.conf.d/x86_64-linux-gnu.conf' &&\
+	ldconfig \
+	)\
 
 install: prerequisites openresty php7 php7-ext-stomp php7-ext-redis php7-ext-phalcon php-amqp php-composer
