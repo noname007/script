@@ -1,5 +1,5 @@
-PHP_PATH=/home/software/php7.0.14dd
-OEPNRESTY_PATH=/home/software/openrestydd
+PHP_PATH= $(shell pwd)/software/php7.0.14dd
+OEPNRESTY_PATH= $(shell pwd)/software/openrestydd
 
 prerequisites:
 # 	yum install -y readline-devel pcre-devel openssl-devel gcc wget && \
@@ -8,7 +8,9 @@ prerequisites:
 # 				libuuid-devel  bzip2-devel gcc-c++\
 
 # prerequisites-deb:
-	apt-get install -y libtool libxml2-dev pkg-config libssl-dev     libbz2-dev    libfreetype6-dev  libmcrypt-dev  libcurl-devel  libicu-dev libpcre3 libpcre3-dev zlib1g-dev libssl-dev build-essential bash-completion autoconf cmake git
+	sudo apt-get  install -y gdb libtool libxml2-dev pkg-config libssl-dev     libbz2-dev    libfreetype6-dev  libmcrypt-dev  curl wget  libcurl4-gnutls-dev libicu-dev libpcre3 libpcre3-dev zlib1g-dev libssl-dev build-essential bash-completion autoconf cmake git
+# 	选no 使用 bash 否则无法使用source
+	sudo dpkg-reconfigure  dash 
 
 openresty: prerequisites
 	test -f 'openresty-1.11.2.2.tar.gz' || wget https://openresty.org/download/openresty-1.11.2.2.tar.gz 
@@ -81,12 +83,11 @@ php-amqp: librabbitmq
 	test -d "amqp-1.7.1" ||( tar -zxvf amqp-1.7.1.tgz  &&\
 	cd amqp-1.7.1 && \
 	phpize  && \
-	./configure  && \
-	./configure  && \
 	./configure --with-amqp --with-librabbitmq-dir=/usr/local/ && \
 	make && \
-	make install && \
-	make test && \
+	make install &&  \
+	echo "extension=amqp.so"   >> $(PHP_PATH)/lib/php.ini && \
+	make test )\
 
 librabbitmq:
 	test -d "rabbitmq-c" || (git clone https://github.com/alanxz/rabbitmq-c.git && \
