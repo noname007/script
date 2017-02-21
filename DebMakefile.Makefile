@@ -8,7 +8,7 @@ prerequisites:
 # 				libuuid-devel  bzip2-devel gcc-c++\
 
 # prerequisites-deb:
-	apt-get install -y libxml2-dev pkg-config libssl-dev     libbz2-dev    libfreetype6-dev  libmcrypt-dev  libcurl-devel  libicu-dev libpcre3 libpcre3-dev zlib1g-dev libssl-dev build-essential bash-completion autoconf cmake git
+	apt-get install -y libtool libxml2-dev pkg-config libssl-dev     libbz2-dev    libfreetype6-dev  libmcrypt-dev  libcurl-devel  libicu-dev libpcre3 libpcre3-dev zlib1g-dev libssl-dev build-essential bash-completion autoconf cmake git
 
 openresty: prerequisites
 	test -f 'openresty-1.11.2.2.tar.gz' || wget https://openresty.org/download/openresty-1.11.2.2.tar.gz 
@@ -89,7 +89,7 @@ php-amqp: librabbitmq
 	make test && \
 
 librabbitmq:
-	test -d "rabbitmq-c" || git clone https://github.com/alanxz/rabbitmq-c.git
+	test -d "rabbitmq-c" || (git clone https://github.com/alanxz/rabbitmq-c.git && \
 	cd rabbitmq-c/ && \
 	git submodule init && \
 	git submodule update && \
@@ -98,6 +98,6 @@ librabbitmq:
 	./configure && \
 	mkdir build && cd build && \
 	cmake .. && \
-	cmake --build .  --target install
+	cmake --build .  --target install )\
 
 install: prerequisites openresty php7 php7-ext-stomp php7-ext-redis php7-ext-phalcon php-amqp php-composer
