@@ -2,16 +2,19 @@ PHP_PATH=/home/software/php7.0.14dd
 OEPNRESTY_PATH=/home/software/openrestydd
 
 prerequisites:
-	yum install -y readline-devel pcre-devel openssl-devel gcc wget \
-				icu libicu libicu-devel \
-				autoconf libjpeg-dev libpng-dev libmcrypt-dev  bzip2 libbz2-dev curl libcurl4-gnutls-dev libfreetype6-dev  libxml2-devel gd-devel libmcrypt-devel libcurl-devel \
-				libuuid-devel  bzip2-devel gcc-c++\
+# 	yum install -y readline-devel pcre-devel openssl-devel gcc wget && \
+# 				icu libicu libicu-devel && \
+# 				autoconf libjpeg-dev libpng-dev libmcrypt-dev  bzip2 libbz2-dev curl libcurl4-gnutls-dev libfreetype6-dev  libxml2-devel gd-devel libmcrypt-devel libcurl-devel \
+# 				libuuid-devel  bzip2-devel gcc-c++\
+
+# prerequisites-deb:
+	apt-get install -y libxml2-dev pkg-config libssl-dev     libbz2-dev    libfreetype6-dev  libmcrypt-dev  libcurl-devel  libicu-dev libpcre3 libpcre3-dev zlib1g-dev libssl-dev build-essential bash-completion autoconf cmake git
 
 openresty: prerequisites
 	test -f 'openresty-1.11.2.2.tar.gz' || wget https://openresty.org/download/openresty-1.11.2.2.tar.gz 
 	test -d 'openresty-1.11.2.2' || tar -zxvf openresty-1.11.2.2.tar.gz 
 	test -d $(OEPNRESTY_PATH) || (\
-	 cd openresty-1.11.2.2 &&\
+	cd openresty-1.11.2.2 &&\
 	./configure --prefix=$(OEPNRESTY_PATH) --with-pcre-jit --with-ipv6 --with-http_gzip_static_module    --with-http_stub_status_module -j2 &&\
 	make -j2 &&\
 	sudo make install &&\
@@ -30,7 +33,7 @@ php7:
 	test -d $(PHP_PATH) || ( \
 	cd php-7.0.14 &&\
 	./configure --prefix=$(PHP_PATH)/ --with-gd --enable-gd-native-ttf --with-zlib --with-mcrypt  --enable-shmop --enable-sockets --enable-wddx --enable-zip --enable-fpm --enable-mbstring --with-zlib-dir --with-bz2 --with-curl --enable-exif  --with-iconv --enable-xml --enable-inline-optimization --enable-bcmath  --with-openssl --with-gettext  --enable-session --enable-fpm --enable-intl --enable-mbstring --enable-opcache  --with-pdo-mysql --enable-mysqlnd &&\
-	make -j &&\
+	make  &&\
 	make install && \
 	cp php.ini-production $(PHP_PATH)/lib/php.ini  && \
 	cp $(PHP_PATH)/etc/php-fpm.conf.default $(PHP_PATH)/etc/php-fpm.conf && \
@@ -41,7 +44,7 @@ php7:
 
 php7-ext-stomp: php7
 	test -f 'stomp-2.0.0.tgz'||wget https://pecl.php.net/get/stomp-2.0.0.tgz
-	test -d 'stomp-2.0.0' || tar -zxvf stomp-2.0.0.tgz
+	test -d 'stomp-2.0.0' || tar -zxvf stomp-2.0.0.tgz && \
 	source ~/.bashrc && \
 	cd stomp-2.0.0 && \
 	phpize && ./configure && make && make install && \
@@ -49,14 +52,14 @@ php7-ext-stomp: php7
 
 php7-ext-redis: php7
 	test -f "redis.3.0.0.tar.gz" || wget https://github.com/phpredis/phpredis/archive/3.0.0.tar.gz  -O redis.3.0.0.tar.gz
-	test -d "phpredis-3.0.0" || tar -zxvf  redis.3.0.0.tar.gz
+	test -d "phpredis-3.0.0" || tar -zxvf  redis.3.0.0.tar.gz && \
 	source ~/.bashrc && \
 	cd phpredis-3.0.0 &&\
 	phpize && ./configure && make && make install && \
 	echo "extension=redis.so" >> $(PHP_PATH)/lib/php.ini
 
 php7-ext-phalcon: php7
-	test -d "cphalcon"|| git clone git://github.com/thisverygoodhhhh/cphalcon.git
+	test -d "cphalcon"|| git clone git://github.com/thisverygoodhhhh/cphalcon.git && \
 	source ~/.bashrc &&\
 	echo $$PATH && \
 	cd cphalcon/build && \
@@ -69,6 +72,32 @@ php-composer:
 	cp composer.phar /bin/composer
 	mv composer.phar /usr/local/bin/composer
 	composer config -g repo.packagist composer https://packagist.phpcomposer.com
-	composer 
+	composer
 
-install: prerequisites openresty php7 php7-ext-stomp php7-ext-redis php7-ext-phalcon
+
+
+php-amqp: librabbitmq
+	test -d "amqp-1.7.1.tgz" ||  wget https://pecl.php.net/get/amqp-1.7.1.tgz
+	test -d "amqp-1.7.1" ||( tar -zxvf amqp-1.7.1.tgz  &&\
+	cd amqp-1.7.1 && \
+	phpize  && \
+	./configure  && \
+	./configure  && \
+	./configure --with-amqp --with-librabbitmq-dir=/usr/local/ && \
+	make && \
+	make install && \
+	make test && \
+
+librabbitmq:
+	test -d "rabbitmq-c" || git clone https://github.com/alanxz/rabbitmq-c.git
+	cd rabbitmq-c/ && \
+	git submodule init && \
+	git submodule update && \
+	git checkout -b v0.8.0 v0.8.0 && \
+	autoreconf -i && \
+	./configure && \
+	mkdir build && cd build && \
+	cmake .. && \
+	cmake --build .  --target install
+
+install: prerequisites openresty php7 php7-ext-stomp php7-ext-redis php7-ext-phalcon php-amqp php-composer
