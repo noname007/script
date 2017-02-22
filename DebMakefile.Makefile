@@ -1,18 +1,19 @@
 PHP_PATH= $(shell pwd)/software/php7.0.14dd
 OEPNRESTY_PATH= $(shell pwd)/software/openrestydd
+ORANGE_PATH ?= $(shell pwd)/software/orangedd
 
-export PATH := $(PHP_PATH)/bin:$PATH
-export PATH := $(OEPNRESTY_PATH)/bin:$PATH
+export $$PATH := $(PHP_PATH)/bin:$$PATH
+export $$PATH := $(OEPNRESTY_PATH)/bin:$$PATH
 
 prerequisites:
 # 	yum install -y readline-devel pcre-devel openssl-devel gcc wget && \
 # 				icu libicu libicu-devel && \
 # 				autoconf libjpeg-dev libpng-dev libmcrypt-dev  bzip2 libbz2-dev curl libcurl4-gnutls-dev libfreetype6-dev  libxml2-devel gd-devel libmcrypt-devel libcurl-devel \
 # 				libuuid-devel  bzip2-devel gcc-c++\
-
-# prerequisites-deb:
-	sudo apt-get  install -y gdb libtool libxml2-dev pkg-config libssl-dev     libbz2-dev    libfreetype6-dev  libmcrypt-dev  curl wget  libcurl4-gnutls-dev libicu-dev libpcre3 libpcre3-dev zlib1g-dev libssl-dev build-essential bash-completion autoconf cmake git
-# 	选no 使用 bash 否则无法使用source
+# 
+	@echo $$PATH
+	@sudo apt-get  install -y gdb libtool libxml2-dev pkg-config libssl-dev libbz2-dev libfreetype6-dev libmcrypt-dev  curl wget  libcurl4-gnutls-dev libicu-dev libpcre3 libpcre3-dev zlib1g-dev libssl-dev build-essential bash-completion autoconf cmake git
+#	选no, 使用 bash 否则无法使用source
 	sudo dpkg-reconfigure  dash 
 
 openresty: prerequisites
@@ -27,10 +28,11 @@ openresty: prerequisites
 	)
 lor: openresty
 	test -d lor || git clone https://github.com/sumory/lor
-	cd lor && sh install.sh
+	cd lor && git pull && \
+	sudo make install
 orange: lor
-	test -d orange || git clone  https://github.com/sumory/orange.git 
-	cd orange && ((git branch|grep 0.6.0) || git checkout -b   0.6.0 0.6.0) && make install
+	test -d orange || git clone  https://github.com/sumory/orange.git ORANGE_PATH
+	cd ORANGE_PATH && ((git branch|grep v0.6.2) || git checkout -b   v0.6.2 v0.6.2)
 
 php7:
 	test -f 'php-7.0.14.tar.gz' || wget http://cn2.php.net/distributions/php-7.0.14.tar.gz
