@@ -109,4 +109,4 @@ librabbitmq:
 	ldconfig \
 	)\
 
-install: prerequisites openresty php7 php7-ext-stomp php7-ext-redis php7-ext-phalcon php-amqp php-composer
+install: prerequisites openresty orange php7 php7-ext-stomp php7-ext-redis php7-ext-phalcon php-amqp php-composer
