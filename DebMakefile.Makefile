@@ -31,8 +31,8 @@ lor: openresty
 	cd lor && git pull && \
 	sudo make install
 orange: lor
-	test -d orange || git clone  https://github.com/sumory/orange.git ORANGE_PATH
-	cd ORANGE_PATH && ((git branch|grep v0.6.2) || git checkout -b   v0.6.2 v0.6.2)
+	test -d orange || git clone  https://github.com/sumory/orange.git $(ORANGE_PATH)
+	cd $(ORANGE_PATH) && ((git branch|grep v0.6.2) || git checkout -b   v0.6.2 v0.6.2)
 
 php7:
 	test -f 'php-7.0.14.tar.gz' || wget http://cn2.php.net/distributions/php-7.0.14.tar.gz
