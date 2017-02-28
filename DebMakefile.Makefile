@@ -12,7 +12,7 @@ prerequisites:
 # 				libuuid-devel  bzip2-devel gcc-c++\
 # 
 	@echo $$PATH
-	@sudo apt-get  install -y gdb libtool libxml2-dev pkg-config libssl-dev libbz2-dev libfreetype6-dev libmcrypt-dev  curl wget  libcurl4-gnutls-dev libicu-dev libpcre3 libpcre3-dev zlib1g-dev libssl-dev build-essential bash-completion autoconf cmake git
+	@sudo apt-get  install -y gdb libtool libxml2-dev pkg-config libssl-dev libbz2-dev libfreetype6-dev libmcrypt-dev  curl wget  libcurl4-gnutls-dev libicu-dev libpcre3 libpcre3-dev zlib1g-dev libssl-dev build-essential bash-completion autoconf cmake git uuid-dev
 #	选no, 使用 bash 否则无法使用source
 	sudo dpkg-reconfigure  dash 
 
