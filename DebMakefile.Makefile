@@ -1,16 +1,18 @@
-PHP_PATH= $(shell pwd)/software/php7.0.14dd
-OEPNRESTY_PATH= $(shell pwd)/software/openrestydd
+PHP_PATH ?= $(shell pwd)/software/php7.0.14dd
+OEPNRESTY_PATH ?= $(shell pwd)/software/openrestydd
 ORANGE_PATH ?= $(shell pwd)/software/orangedd
 
 export $$PATH := $(PHP_PATH)/bin:$$PATH
 export $$PATH := $(OEPNRESTY_PATH)/bin:$$PATH
 
 prerequisites:
-# 	yum install -y readline-devel pcre-devel openssl-devel gcc wget && \
-# 				icu libicu libicu-devel && \
-# 				autoconf libjpeg-dev libpng-dev libmcrypt-dev  bzip2 libbz2-dev curl libcurl4-gnutls-dev libfreetype6-dev  libxml2-devel gd-devel libmcrypt-devel libcurl-devel \
-# 				libuuid-devel  bzip2-devel gcc-c++\
-# 
+	yum install -y readline-devel pcre-devel openssl-devel gcc wget && \
+				icu libicu libicu-devel && \
+				autoconf libjpeg-dev libpng-dev libmcrypt-dev  bzip2 libbz2-dev curl libcurl4-gnutls-dev libfreetype6-dev  libxml2-devel gd-devel libmcrypt-devel libcurl-devel \
+				libuuid-devel  bzip2-devel gcc-c++\
+
+
+prerequisites-ubuntu:
 	@echo $$PATH
 	@sudo apt-get  install -y gdb libtool libxml2-dev pkg-config libssl-dev libbz2-dev libfreetype6-dev libmcrypt-dev  curl wget  libcurl4-gnutls-dev libicu-dev libpcre3 libpcre3-dev zlib1g-dev libssl-dev build-essential bash-completion autoconf cmake git uuid-dev
 #	选no, 使用 bash 否则无法使用source
@@ -22,17 +24,18 @@ openresty: prerequisites
 	test -d $(OEPNRESTY_PATH) || (\
 	cd openresty-1.11.2.2 &&\
 	./configure --prefix=$(OEPNRESTY_PATH) --with-pcre-jit --with-ipv6 --with-http_gzip_static_module    --with-http_stub_status_module -j2 &&\
+# --with-http_ssl_module --with-http_realip_module --with-pcre --with-google_perftools_module --with-http_upstream_check_module --with-http_concat_module
 	make -j2 &&\
 	sudo make install &&\
-	echo 'PATH=$(OEPNRESTY_PATH)/bin:$$PATH'>> ~/.bashrc && source ~/.bashrc  \
+	sudo sh -c 'echo PATH=$(OEPNRESTY_PATH)/bin:$$PATH >> /etc/profile.d/gateway.sh && source /etc/profile.d/gateway.sh' \
 	)
 lor: openresty
-	test -d lor || git clone https://github.com/sumory/lor
+	test -d lor || git clone https://github.com/thisverygoodhhhh/lor.git
 	cd lor && git pull && \
 	sudo make install
 orange: lor
-	test -d orange || git clone  https://github.com/sumory/orange.git $(ORANGE_PATH)
-	cd $(ORANGE_PATH) && ((git branch|grep v0.6.2) || git checkout -b   v0.6.2 v0.6.2)
+	test -d orange || git clone  https://github.com/thisverygoodhhhh/orange.git $(ORANGE_PATH)
+	cd $(ORANGE_PATH) && git checkout master
 
 php7:
 	test -f 'php-7.0.14.tar.gz' || wget http://cn2.php.net/distributions/php-7.0.14.tar.gz
