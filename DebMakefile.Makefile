@@ -23,8 +23,8 @@ openresty: prerequisites
 	test -d 'openresty-1.11.2.2' || tar -zxvf openresty-1.11.2.2.tar.gz 
 	test -d $(OEPNRESTY_PATH) || (\
 	cd openresty-1.11.2.2 &&\
-	./configure --prefix=$(OEPNRESTY_PATH) --with-pcre-jit --with-ipv6 --with-http_gzip_static_module    --with-http_stub_status_module -j2 &&\
-# --with-http_ssl_module --with-http_realip_module --with-pcre --with-google_perftools_module --with-http_upstream_check_module --with-http_concat_module
+	./configure --prefix=$(OEPNRESTY_PATH) --with-pcre-jit --with-ipv6 --with-http_gzip_static_module    --with-http_stub_status_module  --with-http_ssl_module --with-http_realip_module -j2 &&\
+# --with-http_ssl_module --with-http_realip_module --with-google_perftools_module --with-http_upstream_check_module --with-http_concat_module
 	make -j2 &&\
 	sudo make install &&\
 	sudo sh -c 'echo PATH=$(OEPNRESTY_PATH)/bin:$$PATH >> /etc/profile.d/gateway.sh && source /etc/profile.d/gateway.sh' \
