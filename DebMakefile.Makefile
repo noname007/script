@@ -32,9 +32,8 @@ prerequisites-yum:
 
 
 fedora-systemtap:prerequisites
-
-
-
+	sudo yum install systemtap systemtap-runtime kernel-devel yum-utils
+	sudo debuginfo-install kernel
 
 
 prerequisites-ubuntu:
