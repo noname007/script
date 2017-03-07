@@ -1,19 +1,37 @@
-PHP_PATH ?= $(shell pwd)/software/php7.0.14dd
-OEPNRESTY_PATH ?= $(shell pwd)/software/openrestydd
-ORANGE_PATH ?= $(shell pwd)/software/orangedd
+
+SOFTWARE_PATH ?= $(HOME)/software
+
+PHP_PATH ?= $(SOFTWARE_PATH)/php7.0.14dd
+OEPNRESTY_PATH ?= $(SOFTWARE_PATH)/openrestydd
+ORANGE_PATH ?= $(SOFTWARE_PATH)/orangedd
 
 export $$PATH := $(PHP_PATH)/bin:$$PATH
 export $$PATH := $(OEPNRESTY_PATH)/bin:$$PATH
 
 prerequisites:
-	yum install -y readline-devel pcre-devel openssl-devel gcc wget && \
-				icu libicu libicu-devel && \
-				autoconf libjpeg-dev libpng-dev libmcrypt-dev  bzip2 libbz2-dev curl libcurl4-gnutls-dev libfreetype6-dev  libxml2-devel gd-devel libmcrypt-devel libcurl-devel \
-				libuuid-devel  bzip2-devel gcc-c++\
+	mkdir -p $(SOFTWARE_PATH)
+	sudo yum install -y readline-devel pcre-devel openssl-devel gcc wget \
+				icu libicu libicu-devel \
+				autoconf \
+				bzip2 \
+				curl \
+				libxml2-devel \
+				gd-devel \
+				libmcrypt-devel \
+				libcurl-devel\
+				libuuid-devel \
+				bzip2-devel gcc-c++ git
+				# libbz2-dev \
+				# libfreetype6-dev \
+				# libcurl4-gnutls-dev 
+				# libpng-dev 
+				# libmcrypt-dev 
+				# libjpeg-dev 
 
 
 prerequisites-ubuntu:
-	@echo $$PATH
+	mkdir -p  $(SOFTWARE_PATH)
+	# @echo $$PATH
 	@sudo apt-get  install -y gdb libtool libxml2-dev pkg-config libssl-dev libbz2-dev libfreetype6-dev libmcrypt-dev  curl wget  libcurl4-gnutls-dev libicu-dev libpcre3 libpcre3-dev zlib1g-dev libssl-dev build-essential bash-completion autoconf cmake git uuid-dev
 #	选no, 使用 bash 否则无法使用source
 	sudo dpkg-reconfigure  dash 
@@ -23,12 +41,13 @@ openresty: prerequisites
 	test -d 'openresty-1.11.2.2' || tar -zxvf openresty-1.11.2.2.tar.gz 
 	test -d $(OEPNRESTY_PATH) || (\
 	cd openresty-1.11.2.2 &&\
-	./configure --prefix=$(OEPNRESTY_PATH) --with-pcre-jit --with-ipv6 --with-http_gzip_static_module    --with-http_stub_status_module  --with-http_ssl_module --with-http_realip_module -j2 &&\
-# --with-http_ssl_module --with-http_realip_module --with-google_perftools_module --with-http_upstream_check_module --with-http_concat_module
+	./configure --prefix=$(OEPNRESTY_PATH) --with-debug --with-pcre-jit --with-ipv6 --with-http_gzip_static_module    --with-http_stub_status_module  --with-http_ssl_module --with-http_realip_module -j2 &&\
 	make -j2 &&\
 	sudo make install &&\
 	sudo sh -c 'echo PATH=$(OEPNRESTY_PATH)/bin:$$PATH >> /etc/profile.d/gateway.sh && source /etc/profile.d/gateway.sh' \
 	)
+# --with-http_ssl_module --with-http_realip_module --with-google_perftools_module --with-http_upstream_check_module --with-http_concat_module
+
 lor: openresty
 	test -d lor || git clone https://github.com/thisverygoodhhhh/lor.git
 	cd lor && git pull && \
