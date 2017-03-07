@@ -8,7 +8,9 @@ ORANGE_PATH ?= $(SOFTWARE_PATH)/orangedd
 export $$PATH := $(PHP_PATH)/bin:$$PATH
 export $$PATH := $(OEPNRESTY_PATH)/bin:$$PATH
 
-prerequisites:
+prerequisites:prerequisites-yum
+
+prerequisites-yum:
 	mkdir -p $(SOFTWARE_PATH)
 	sudo yum install -y readline-devel pcre-devel openssl-devel gcc wget \
 				icu libicu libicu-devel \
@@ -26,7 +28,13 @@ prerequisites:
 				# libcurl4-gnutls-dev 
 				# libpng-dev 
 				# libmcrypt-dev 
-				# libjpeg-dev 
+				# libjpeg-dev
+
+
+fedora-systemtap:prerequisites
+
+
+
 
 
 prerequisites-ubuntu:
@@ -53,7 +61,7 @@ lor: openresty
 	cd lor && git pull && \
 	sudo make install
 orange: lor
-	test -d orange || git clone  https://github.com/thisverygoodhhhh/orange.git $(ORANGE_PATH)
+	test -d $(ORANGE_PATH) || git clone  https://github.com/thisverygoodhhhh/orange.git $(ORANGE_PATH)
 	cd $(ORANGE_PATH) && git checkout master
 
 php7:
@@ -132,3 +140,9 @@ librabbitmq:
 	)\
 
 install: prerequisites openresty orange php7 php7-ext-stomp php7-ext-redis php7-ext-phalcon php-amqp php-composer
+
+
+update-orange: orange
+	cd $(ORANGE_PATH) && git checkout master && git pull origin master
+
+update-lor: lor
