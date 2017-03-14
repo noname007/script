@@ -2,3 +2,7 @@ wget  --no-check-certificate  https://raw.githubusercontent.com/racaljk/hosts/ma
 pause
 
 rem -O %SYSTEMROOT%/System32/drivers/etc/hosts
+
+cat %SYSTEMROOT%/System32/drivers/etc/hosts
+
+pause

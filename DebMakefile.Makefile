@@ -12,7 +12,12 @@ prerequisites:prerequisites-yum
 
 prerequisites-yum:
 	mkdir -p $(SOFTWARE_PATH)
-	sudo yum install -y readline-devel pcre-devel openssl-devel gcc wget \
+	sudo yum install -y  \
+				readline-devel \
+				pcre-devel \
+				openssl-devel \
+				gcc \
+				wget \
 				icu libicu libicu-devel \
 				autoconf \
 				bzip2 \
@@ -22,7 +27,11 @@ prerequisites-yum:
 				libmcrypt-devel \
 				libcurl-devel\
 				libuuid-devel \
-				bzip2-devel gcc-c++ git
+				bzip2-devel \
+				gcc-c++ \
+				git \
+				patch  \
+				
 				# libbz2-dev \
 				# libfreetype6-dev \
 				# libcurl4-gnutls-dev 
@@ -138,7 +147,16 @@ librabbitmq:
 	ldconfig \
 	)\
 
-install: prerequisites openresty orange php7 php7-ext-stomp php7-ext-redis php7-ext-phalcon php-amqp php-composer
+awk:
+	sudo yum install  
+	sudo yum install  git
+	git clone https://github.com/wg/wrk.git
+	cd wrk && \
+	make && \
+	sudo cp wrk /bin
+	wrk
+
+install-all: prerequisites openresty orange php7 php7-ext-stomp php7-ext-redis php7-ext-phalcon php-amqp php-composer
 
 
 update-orange: orange
