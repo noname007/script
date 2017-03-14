@@ -147,7 +147,7 @@ librabbitmq:
 	ldconfig \
 	)\
 
-awk:
+wrk:
 	sudo yum install  
 	sudo yum install  git
 	git clone https://github.com/wg/wrk.git
