@@ -147,7 +147,7 @@ librabbitmq:
 	ldconfig \
 	)\
 
-wrk: prerequisite
+wrk: prerequisites
 	git clone https://github.com/wg/wrk.git
 	cd wrk && \
 	make && \
