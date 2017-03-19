@@ -1,9 +1,9 @@
 
-SOFTWARE_PATH ?= $(HOME)/software
+SOFTWARE_PATH ?= $(HOME)
 
-PHP_PATH ?= $(SOFTWARE_PATH)/php7.0.14dd
-OEPNRESTY_PATH ?= $(SOFTWARE_PATH)/openrestydd
-ORANGE_PATH ?= $(SOFTWARE_PATH)/orangedd
+PHP_PATH ?= $(SOFTWARE_PATH)/software/php7.0.14dd
+OEPNRESTY_PATH ?= $(SOFTWARE_PATH)/software/openrestydd
+ORANGE_PATH ?= $(SOFTWARE_PATH)/software/orangedd
 
 export $$PATH := $(PHP_PATH)/bin:$$PATH
 export $$PATH := $(OEPNRESTY_PATH)/bin:$$PATH
@@ -31,6 +31,7 @@ prerequisites-yum:
 				gcc-c++ \
 				git \
 				patch  \
+				htop \
 				
 				# libbz2-dev \
 				# libfreetype6-dev \
@@ -41,9 +42,18 @@ prerequisites-yum:
 
 
 fedora-systemtap:prerequisites
-	sudo yum install systemtap systemtap-runtime kernel-devel yum-utils
-	sudo debuginfo-install kernel
+	sudo yum install -y systemtap systemtap-runtime kernel-devel yum-utils  
+	sudo debuginfo-install -y kernel
+	sudo stap -ve 'probe begin { log("hello world") exit () }'
+	sudo stap -c df -e 'probe syscall.* { if (target()==pid()) log(name." ".argstr) }'
 
+
+update-hosts:
+	sudo wget https://raw.githubusercontent.com/racaljk/hosts/master/hosts -O /etc/hosts
+
+
+fedora-desktop:update-hosts
+	sudo yum install chromium
 
 prerequisites-ubuntu:
 	mkdir -p  $(SOFTWARE_PATH)
