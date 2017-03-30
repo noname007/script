@@ -44,8 +44,11 @@ prerequisites-yum:
 fedora-systemtap:prerequisites
 	sudo yum install -y systemtap systemtap-runtime kernel-devel yum-utils  
 	sudo debuginfo-install -y kernel
+
+systemtap-check:
 	sudo stap -ve 'probe begin { log("hello world") exit () }'
 	sudo stap -c df -e 'probe syscall.* { if (target()==pid()) log(name." ".argstr) }'
+	sudo stap -d /bin/ls --ldd -e 'probe process("ls").function("xmalloc") {print_usyms(ubacktrace())}' -c "ls /"
 
 
 update-hosts:
