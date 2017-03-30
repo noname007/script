@@ -32,7 +32,7 @@ prerequisites-yum:
 				git \
 				patch  \
 				htop \
-				
+				libtool \
 				# libbz2-dev \
 				# libfreetype6-dev \
 				# libcurl4-gnutls-dev 
