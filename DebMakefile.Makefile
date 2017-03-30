@@ -151,15 +151,15 @@ librabbitmq:
 	cd rabbitmq-c/ && \
 	git submodule init && \
 	git submodule update && \
-	git checkout -b v0.8.0 v0.8.0 && \
+	((git branch|grep "* v0.8.0") || git checkout -b v0.8.0 v0.8.0 ) && \
 	autoreconf -i && \
 	./configure && \
 	mkdir build && cd build && \
 	cmake .. && \
-	sudo cmake --build .  --target install  &&\
-	sudo sh -c 'echo "/usr/local/lib/x86_64-linux-gnu"  >> /etc/ld.so.conf.d/x86_64-linux-gnu.conf' &&\
-	ldconfig \
-	)\
+	sudo cmake --build .  --target install && \
+	sudo sh -c 'tt=`find / -name librabbitmq.so | grep -v 'rabbitmq-c' ` && tt1=${tt:0:${#tt}-15} && echo "add \'$tt1\' to  /etc/ld.so.conf.d/x86_64-linux-gnu.conf" && echo $tt1 >>  /etc/ld.so.conf.d/x86_64-linux-gnu.conf')
+	sudo ldconfig
+	
 
 wrk: prerequisites
 	git clone https://github.com/wg/wrk.git
