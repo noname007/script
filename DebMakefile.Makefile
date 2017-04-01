@@ -41,6 +41,14 @@ prerequisites-yum:
 				# libmcrypt-dev 
 				# libjpeg-dev
 
+yum-shell:
+	sudo yum install -y curl zsh fish
+	sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
+
+deb-shell:
+	sudo apt-get install -y curl zsh fish
+	sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
+
 
 fedora-systemtap:prerequisites
 	sudo yum install -y systemtap systemtap-runtime kernel-devel yum-utils  
