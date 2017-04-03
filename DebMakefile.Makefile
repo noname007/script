@@ -4,6 +4,8 @@ SOFTWARE_PATH ?= $(HOME)
 PHP_PATH ?= $(SOFTWARE_PATH)/software/php7.0.14dd
 OEPNRESTY_PATH ?= $(SOFTWARE_PATH)/software/openrestydd
 ORANGE_PATH ?= $(SOFTWARE_PATH)/software/orangedd
+SYSTEMTAP_PATH ?= $(SOFTWARE_PATH)/software/stap
+SYSTEMTAP_VERSION ?= 3.1
 
 export $$PATH := $(PHP_PATH)/bin:$$PATH
 export $$PATH := $(OEPNRESTY_PATH)/bin:$$PATH
@@ -34,13 +36,16 @@ prerequisites-yum:
 				htop \
 				libtool \
 				cmake \
+				vim \
+				make \
+				ntpdate \
 				# libbz2-dev \
 				# libfreetype6-dev \
 				# libcurl4-gnutls-dev 
 				# libpng-dev 
 				# libmcrypt-dev 
 				# libjpeg-dev
-
+	sudo ntpdate time.nist.gov
 yum-shell:
 	sudo yum install -y curl zsh fish
 	sh -c "$$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
@@ -53,11 +58,18 @@ deb-shell:
 fedora-systemtap:prerequisites
 	sudo yum install -y systemtap systemtap-runtime kernel-devel yum-utils  
 	sudo debuginfo-install -y kernel
+	sudo make -f DebMakefile.Makefile systemtap-check
 
 systemtap-check:
-	sudo stap -ve 'probe begin { log("hello world") exit () }'
-	sudo stap -c df -e 'probe syscall.* { if (target()==pid()) log(name." ".argstr) }'
-	sudo stap -d /bin/ls --ldd -e 'probe process("ls").function("xmalloc") {print_usyms(ubacktrace())}' -c "ls /"
+	@echo '============================================================================================================================'
+	@echo "exce:                    source /etc/profile.d/devops.sh                              "
+	@echo "dbgsym:     http://ddebs.ubuntu.com/pool/main/l/linux/?C=M;O=D                        "
+	@echo '============================================================================================================================'
+	stap -ve 'probe begin { log("hello world") exit () }' 
+	stap -c df -e 'probe syscall.* { if (target()==pid()) log(name." ".argstr) }' 
+	gcc -g -O2 system-check.c  -o a.out 
+	stap -e 'probe process("./a.out").function("main") { printf("hello\n"); }' -c "./a.out" 
+	# sudo stap -d /bin/ls --ldd -e 'probe process("ls").function("xmalloc") {print_usyms(ubacktrace())}' -c "ls /"
 
 
 update-hosts:
@@ -70,9 +82,69 @@ fedora-desktop:update-hosts
 prerequisites-ubuntu:
 	mkdir -p  $(SOFTWARE_PATH)
 	# @echo $$PATH
-	@sudo apt-get  install -y gdb libtool libxml2-dev pkg-config libssl-dev libbz2-dev libfreetype6-dev libmcrypt-dev  curl wget  libcurl4-gnutls-dev libicu-dev libpcre3 libpcre3-dev zlib1g-dev libssl-dev build-essential bash-completion autoconf cmake git uuid-dev
-#	选no, 使用 bash 否则无法使用source
+	@sudo apt-get  install -y \
+				gdb    \
+				libtool    \
+				libxml2-dev    \
+				pkg-config    \
+				libssl-dev    \
+				libbz2-dev    \
+				libfreetype6-dev    \
+				libmcrypt-dev    \
+				curl    \
+				wget    \
+				libcurl4-gnutls-dev    \
+				libicu-dev    \
+				libpcre3    \
+				libpcre3-dev    \
+				zlib1g-dev    \
+				libssl-dev    \
+				build-essential    \
+				bash-completion    \
+				autoconf    \
+				cmake    \
+				git    \
+				uuid-dev    \
+				vim \
+				make \
+				ntpdate \
+				gettext
+#	选no,使用bash 否则无法使用source
 	sudo dpkg-reconfigure  dash 
+	sudo ntpdate time.nist.gov
+
+
+unbutu-systemtap-depdency:prerequisites-ubuntu
+	sudo apt-get install -y linux-image-`uname -r`\* linux-headers-`uname -r` 
+	sudo apt-get install -y \
+			libavahi-client-dev \
+			libelf-dev \
+			libnspr4-dev \
+			libnss3-dev \
+			libnss3-tools \
+			pkg-config \
+			texlive-fonts-recommended \
+			texlive-latex-base \
+			texlive-latex-extra \
+			texlive-latex-recommended \
+			gettext \
+			
+			elfutils \
+			libdw-dev \
+
+deb-systemtap:unbutu-systemtap-depdency systemtap-install
+
+systemtap-install:
+	test -f systemtap-$(SYSTEMTAP_VERSION).tar.gz ||wget https://sourceware.org/systemtap/ftp/releases/systemtap-$(SYSTEMTAP_VERSION).tar.gz 
+	tar -zxvf systemtap-$(SYSTEMTAP_VERSION).tar.gz
+	cd systemtap-3.1 &&\
+	./configure --prefix=$(SYSTEMTAP_PATH)  --disable-docs --disable-refdocs CFLAGS="-g -O2"  &&\
+	make && sudo make install
+	sh -c 'echo PATH=$(SYSTEMTAP_PATH)/bin:$$PATH >> /etc/profile.d/devops.sh && source /etc/profile.d/devops.sh' &&\
+	make -f DebMakefile.Makefile systemtap-check
+
+
+
 
 openresty: prerequisites
 	test -f 'openresty-1.11.2.2.tar.gz' || wget https://openresty.org/download/openresty-1.11.2.2.tar.gz 
@@ -82,7 +154,7 @@ openresty: prerequisites
 	./configure --prefix=$(OEPNRESTY_PATH) --with-debug --with-pcre-jit --with-ipv6 --with-http_gzip_static_module    --with-http_stub_status_module  --with-http_ssl_module --with-http_realip_module -j2 &&\
 	make -j2 &&\
 	sudo make install &&\
-	sudo sh -c 'echo PATH=$(OEPNRESTY_PATH)/bin:$$PATH >> /etc/profile.d/gateway.sh && source /etc/profile.d/gateway.sh' \
+	sudo sh -c 'echo PATH=$(OEPNRESTY_PATH)/bin:$$PATH >> /etc/profile.d/devops.sh && source /etc/profile.d/devops.sh' \
 	)
 # --with-http_ssl_module --with-http_realip_module --with-google_perftools_module --with-http_upstream_check_module --with-http_concat_module
 
@@ -169,7 +241,7 @@ librabbitmq:
 	sudo ldconfig
 	
 
-wrk: prerequisites
+wrk:
 	git clone https://github.com/wg/wrk.git
 	cd wrk && \
 	make && \
