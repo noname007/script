@@ -58,10 +58,9 @@ deb-shell:
 fedora-systemtap:prerequisites
 	sudo yum install -y systemtap systemtap-runtime kernel-devel yum-utils  
 	sudo debuginfo-install -y kernel
-	sudo make -f DebMakefile.Makefile systemtap-check
 
 systemtap-check:
-	@echo '============================================================================================================================'
+	@echo '=================================== In Ubuntu 16.04 ========================================================================================='
 	@echo "exce:                    source /etc/profile.d/devops.sh                              "
 	@echo "dbgsym:     http://ddebs.ubuntu.com/pool/main/l/linux/?C=M;O=D                        "
 	@echo '============================================================================================================================'
@@ -128,7 +127,6 @@ unbutu-systemtap-depdency:prerequisites-ubuntu
 			texlive-latex-extra \
 			texlive-latex-recommended \
 			gettext \
-			
 			elfutils \
 			libdw-dev \
 
@@ -141,7 +139,6 @@ systemtap-install:
 	./configure --prefix=$(SYSTEMTAP_PATH)  --disable-docs --disable-refdocs CFLAGS="-g -O2"  &&\
 	make && sudo make install
 	sh -c 'echo PATH=$(SYSTEMTAP_PATH)/bin:$$PATH >> /etc/profile.d/devops.sh && source /etc/profile.d/devops.sh' &&\
-	make -f DebMakefile.Makefile systemtap-check
 
 
 
