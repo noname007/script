@@ -260,4 +260,4 @@ update-orange: orange
 update-lor: lor
 
 bug-fedora:
-
+	sudo dnf upgrade perl-libs
