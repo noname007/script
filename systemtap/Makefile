@@ -7,6 +7,11 @@ ORANGE_PATH ?= $(SOFTWARE_PATH)/software/orangedd
 SYSTEMTAP_PATH ?= $(SOFTWARE_PATH)/software/stap
 SYSTEMTAP_VERSION ?= 3.1
 
+BUILD_PATH?=$(SOFTWARE_PATH)/build
+
+PHP_VERSION ?= 7.0.14
+PHP_AMQP_VERSION ?= 1.7.1
+
 export $$PATH := $(PHP_PATH)/bin:$$PATH
 export $$PATH := $(OEPNRESTY_PATH)/bin:$$PATH
 
@@ -164,10 +169,10 @@ orange: lor
 	cd $(ORANGE_PATH) && git checkout master
 
 php7:
-	test -f 'php-7.0.14.tar.gz' || wget http://cn2.php.net/distributions/php-7.0.14.tar.gz
-	test -d php-7.0.14 || tar -zxvf php-7.0.14.tar.gz
+	test -f $(BUILD_PATH)/php-$(PHP_VERSION).tar.gz || wget http://cn2.php.net/distributions/php-$(PHP_VERSION).tar.gz
+	test -d $(BUILD_PATH)/php-$(PHP_VERSION) || tar -zxvf php-$(PHP_VERSION).tar.gz
 	test -d $(PHP_PATH) || ( \
-	cd php-7.0.14 &&\
+	cd php-$(PHP_VERSION) &&\
 	./configure --prefix=$(PHP_PATH)/ --with-gd --enable-gd-native-ttf --with-zlib --with-mcrypt  --enable-shmop --enable-sockets --enable-wddx --enable-zip --enable-fpm --enable-mbstring --with-zlib-dir --with-bz2 --with-curl --enable-exif  --with-iconv --enable-xml --enable-inline-optimization --enable-bcmath  --with-openssl --with-gettext  --enable-session --enable-fpm --enable-intl --enable-mbstring --enable-opcache  --with-pdo-mysql --enable-mysqlnd &&\
 	make  &&\
 	make install && \
@@ -212,10 +217,10 @@ php-composer:
 
 
 
-php-amqp: librabbitmq
-	test -d "amqp-1.7.1.tgz"||test -d "amqp-1.7.1" ||  wget https://pecl.php.net/get/amqp-1.7.1.tgz
-	test -d "amqp-1.7.1" ||( tar -zxvf amqp-1.7.1.tgz  &&\
-	cd amqp-1.7.1 && \
+php-amqp: librabbitmq php7
+	test -f $(BUILD_PATH)/amqp-$(PHP_AMQP_VERSION).tgz|| wget https://pecl.php.net/get/amqp-$(PHP_AMQP_VERSION).tgz
+	test -d $(BUILD_PATH)/amqp-$(PHP_AMQP_VERSION) ||( tar -zxvf amqp-$(PHP_AMQP_VERSION).tgz  &&\
+	cd $(BUILD_PATH)/amqp-$(PHP_AMQP_VERSION) && \
 	phpize  && \
 	./configure --with-amqp --with-librabbitmq-dir=/usr/local/ && \
 	make && \
@@ -224,17 +229,18 @@ php-amqp: librabbitmq
 	make test )\
 
 librabbitmq:
-	test -d "rabbitmq-c" || (git clone https://github.com/alanxz/rabbitmq-c.git && \
-	cd rabbitmq-c/ && \
+	test -d $(BUILD_PATH)/rabbitmq-c || git clone https://github.com/alanxz/rabbitmq-c.git $(BUILD_PATH)/rabbitmq-c
+	# (sudo find / -name librabbitmq.so | grep -v 'rabbitmq-c' )|| 
+	cd $(BUILD_PATH)/rabbitmq-c/ && \
 	git submodule init && \
 	git submodule update && \
 	((git branch|grep "* v0.8.0") || git checkout -b v0.8.0 v0.8.0 ) && \
 	autoreconf -i && \
 	./configure && \
-	mkdir build && cd build && \
+	mkdir -p build && cd build && \
 	cmake .. && \
 	sudo cmake --build .  --target install && \
-	sudo sh -c 'tt=`find / -name librabbitmq.so | grep -v 'rabbitmq-c' ` && tt1=${tt:0:${#tt}-15} && echo "add \'$tt1\' to  /etc/ld.so.conf.d/x86_64-linux-gnu.conf" && echo $tt1 >>  /etc/ld.so.conf.d/x86_64-linux-gnu.conf')
+	sudo sh -c "tt=`sudo find / -name librabbitmq.so | grep -v 'rabbitmq-c' ` && tt1=$${tt:0:$${#tt}-15} && echo \"add '$$tt1' to  /etc/ld.so.conf.d/devpos.conf\" && echo $$tt1 >>  /etc/ld.so.conf.d/devpos.conf" 
 	sudo ldconfig
 	
 
@@ -252,3 +258,6 @@ update-orange: orange
 	cd $(ORANGE_PATH) && git checkout master && git pull origin master
 
 update-lor: lor
+
+bug-fedora:
+
