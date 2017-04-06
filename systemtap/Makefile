@@ -239,8 +239,8 @@ librabbitmq:
 	./configure && \
 	mkdir -p build && cd build && \
 	cmake .. && \
-	sudo cmake --build .  --target install && \
-	sudo sh -c "tt=`sudo find / -name librabbitmq.so | grep -v 'rabbitmq-c' ` && tt1=$${tt:0:$${#tt}-15} && echo \"add '$$tt1' to  /etc/ld.so.conf.d/devpos.conf\" && echo $$tt1 >>  /etc/ld.so.conf.d/devpos.conf" 
+	sudo cmake --build .  --target install
+	(tt= `sudo find / -name librabbitmq.so | grep -v 'rabbitmq-c'`) && tt1=$${tt:0:$${#tt}-15} && echo "add '$$tt1' to  /etc/ld.so.conf.d/devpos.conf" && echo $$tt1 >>  /etc/ld.so.conf.d/devpos.conf 
 	sudo ldconfig
 	
 
