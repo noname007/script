@@ -228,21 +228,30 @@ php-amqp: librabbitmq php7
 	echo "extension=amqp.so"   >> $(PHP_PATH)/lib/php.ini && \
 	make test )\
 
+.ONESHELL:
 librabbitmq:
 	test -d $(BUILD_PATH)/rabbitmq-c || git clone https://github.com/alanxz/rabbitmq-c.git $(BUILD_PATH)/rabbitmq-c
-	# (sudo find / -name librabbitmq.so | grep -v 'rabbitmq-c' )|| 
-	cd $(BUILD_PATH)/rabbitmq-c/ && \
-	git submodule init && \
-	git submodule update && \
-	((git branch|grep "* v0.8.0") || git checkout -b v0.8.0 v0.8.0 ) && \
-	autoreconf -i && \
-	./configure && \
-	mkdir -p build && cd build && \
-	cmake .. && \
+	# (sudo find / -name librabbitmq.so | grep -v 'rabbitmq-c' )||
+	cd $(BUILD_PATH)/rabbitmq-c/
+	git submodule init
+	git submodule update
+	((git branch|grep "* v0.8.0") || git checkout -b v0.8.0 v0.8.0 )
+	autoreconf -i
+	./configure
+	mkdir -p build
+	cd build
+	cmake ..
 	sudo cmake --build .  --target install
-	(tt= `sudo find / -name librabbitmq.so | grep -v 'rabbitmq-c'`) && tt1=$${tt:0:$${#tt}-15} && echo "add '$$tt1' to  /etc/ld.so.conf.d/devpos.conf" && echo $$tt1 >>  /etc/ld.so.conf.d/devpos.conf 
+	tt=`sudo find / -name librabbitmq.so | grep -v 'rabbitmq-c'`
+	tt1=$${tt:0:$${#tt}-15}
+	echo "add '$$tt1' to  /etc/ld.so.conf.d/devpos.conf"
+	echo $$tt1 >>  /etc/ld.so.conf.d/devpos.conf
 	sudo ldconfig
-	
+
+update-must:
+	wget http://alpha.gnu.org/gnu/make/make-4.1.90.tar.gz
+	tar -zxvf make-4.1.90.tar.gz
+	cd make-4.1.90 && ./configure && make CFLAGS="-g -O2 -std=gnu99" && make install && make -v && which make
 
 wrk:
 	git clone https://github.com/wg/wrk.git
