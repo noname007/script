@@ -41,7 +41,9 @@ __其他：__
 
 ### 用法：
 
-    make echo  输出所有的默认的 安装路径，版本
+    make echo  
+
+输出所有的默认的 安装路径，版本
 
     make echo SOFTWARE_PATH=/usr/local BUILD_PATH=$HOME
 
