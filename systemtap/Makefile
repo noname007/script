@@ -5,14 +5,16 @@ PHP_PATH ?= $(SOFTWARE_PATH)/software/php7.0.14dd
 OEPNRESTY_PATH ?= $(SOFTWARE_PATH)/software/openrestydd
 ORANGE_PATH ?= $(SOFTWARE_PATH)/software/orangedd
 SYSTEMTAP_PATH ?= $(SOFTWARE_PATH)/software/stap
-SYSTEMTAP_VERSION ?= 3.1
-
+FLAMEGRAPH_PATH ?= $(SOFTWARE_PATH)/FlameGraph
 BUILD_PATH?=$(SOFTWARE_PATH)/build
+
+SYSTEMTAP_VERSION ?= 3.1
 
 PHP_VERSION ?= 7.0.14
 PHP_AMQP_VERSION ?= 1.7.1
 
 OEPNRESTY_VERSION ?= 1.11.2.2
+
 
 export $$PATH := $(PHP_PATH)/bin:$$PATH
 export $$PATH := $(OEPNRESTY_PATH)/bin:$$PATH
@@ -25,13 +27,14 @@ echo:
 	@echo OEPNRESTY_PATH 	  "---------" $(OEPNRESTY_PATH)
 	@echo ORANGE_PATH 		  "---------" $(ORANGE_PATH)
 	@echo SYSTEMTAP_PATH 	  "---------" $(SYSTEMTAP_PATH)
+	@echo FLAMEGRAPH_PATH 	  "---------" $(FLAMEGRAPH_PATH)
 	@echo SYSTEMTAP_VERSION 	  "---------" $(SYSTEMTAP_VERSION)
 	@echo BUILD_PATH 		  "---------" $(BUILD_PATH)
 	@echo PHP_VERSION 		  "---------" $(PHP_VERSION)
 	@echo PHP_AMQP_VERSION 	  "---------" $(PHP_AMQP_VERSION)
 
 
-prerequisites:prerequisites-yum
+prerequisites:prerequisites-y
 
 prerequisites-yum:
 	mkdir -p $(SOFTWARE_PATH)
@@ -162,6 +165,9 @@ systemtap-install:
 	make && sudo make install
 	sh -c 'echo PATH=$(SYSTEMTAP_PATH)/bin:$$PATH >> /etc/profile.d/devops.sh && source /etc/profile.d/devops.sh' &&\
 
+flamegraph:
+	test -d $(FLAMEGRAPH_PATH) || git clone https://github.com/brendangregg/FlameGraph $(FLAMEGRAPH_PATH)
+	sh -c 'echo PATH=$(FLAMEGRAPH_PATH):$$PATH >> /etc/profile.d/devops.sh'
 
 openresty: prerequisites
 	test -f 'openresty-$(OEPNRESTY_VERSION).tar.gz' || wget https://openresty.org/download/openresty-$(OEPNRESTY_VERSION).tar.gz 

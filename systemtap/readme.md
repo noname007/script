@@ -26,7 +26,7 @@ __其他：__
 - systemtap (下面是已经测试过的系统)
     + ubunutu 16.04
     + fedora 25
-
+- Flame Graph
 
 ### makefile 概要
 
@@ -50,6 +50,14 @@ __其他：__
 其他的
 - `_VERSION` 后缀的，用于指定软件的版本号
 
+
+使用默认参数安装，例如：
+
+    make flamegraph
+
+将会把 https://github.com/brendangregg/FlameGraph 安装到系统中并将路径添加到环境变量。
+
+> 每个目标都表示一个软件的安装，其他的软件安装参考下makefile中的目标。
 
 
 
