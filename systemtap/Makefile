@@ -12,8 +12,24 @@ BUILD_PATH?=$(SOFTWARE_PATH)/build
 PHP_VERSION ?= 7.0.14
 PHP_AMQP_VERSION ?= 1.7.1
 
+OEPNRESTY_VERSION ?= 1.11.2.2
+
 export $$PATH := $(PHP_PATH)/bin:$$PATH
 export $$PATH := $(OEPNRESTY_PATH)/bin:$$PATH
+
+.ONESHELL:
+echo:
+	echo $$PATH
+	@echo SOFTWARE_PATH 		  "---------" $(SOFTWARE_PATH)
+	@echo PHP_PATH 			  "---------" $(PHP_PATH)
+	@echo OEPNRESTY_PATH 	  "---------" $(OEPNRESTY_PATH)
+	@echo ORANGE_PATH 		  "---------" $(ORANGE_PATH)
+	@echo SYSTEMTAP_PATH 	  "---------" $(SYSTEMTAP_PATH)
+	@echo SYSTEMTAP_VERSION 	  "---------" $(SYSTEMTAP_VERSION)
+	@echo BUILD_PATH 		  "---------" $(BUILD_PATH)
+	@echo PHP_VERSION 		  "---------" $(PHP_VERSION)
+	@echo PHP_AMQP_VERSION 	  "---------" $(PHP_AMQP_VERSION)
+
 
 prerequisites:prerequisites-yum
 
@@ -64,7 +80,10 @@ fedora-systemtap:prerequisites
 	sudo yum install -y systemtap systemtap-runtime kernel-devel yum-utils  
 	sudo debuginfo-install -y kernel
 
-systemtap-check:
+fedora-desktop:update-hosts
+	sudo yum install chromium
+
+check-systemtap:
 	@echo '=================================== In Ubuntu 16.04 ========================================================================================='
 	@echo "exce:                    source /etc/profile.d/devops.sh                              "
 	@echo "dbgsym:     http://ddebs.ubuntu.com/pool/main/l/linux/?C=M;O=D                        "
@@ -80,8 +99,6 @@ update-hosts:
 	sudo wget https://raw.githubusercontent.com/racaljk/hosts/master/hosts -O /etc/hosts
 
 
-fedora-desktop:update-hosts
-	sudo yum install chromium
 
 prerequisites-ubuntu:
 	mkdir -p  $(SOFTWARE_PATH)
@@ -146,13 +163,11 @@ systemtap-install:
 	sh -c 'echo PATH=$(SYSTEMTAP_PATH)/bin:$$PATH >> /etc/profile.d/devops.sh && source /etc/profile.d/devops.sh' &&\
 
 
-
-
 openresty: prerequisites
-	test -f 'openresty-1.11.2.2.tar.gz' || wget https://openresty.org/download/openresty-1.11.2.2.tar.gz 
-	test -d 'openresty-1.11.2.2' || tar -zxvf openresty-1.11.2.2.tar.gz 
+	test -f 'openresty-$(OEPNRESTY_VERSION).tar.gz' || wget https://openresty.org/download/openresty-$(OEPNRESTY_VERSION).tar.gz 
+	test -d 'openresty-$(OEPNRESTY_VERSION)' || tar -zxvf openresty-$(OEPNRESTY_VERSION).tar.gz 
 	test -d $(OEPNRESTY_PATH) || (\
-	cd openresty-1.11.2.2 &&\
+	cd openresty-$(OEPNRESTY_VERSION) &&\
 	./configure --prefix=$(OEPNRESTY_PATH) --with-debug --with-pcre-jit --with-ipv6 --with-http_gzip_static_module    --with-http_stub_status_module  --with-http_ssl_module --with-http_realip_module -j2 &&\
 	make -j2 &&\
 	sudo make install &&\
@@ -168,20 +183,27 @@ orange: lor
 	test -d $(ORANGE_PATH) || git clone  https://github.com/thisverygoodhhhh/orange.git $(ORANGE_PATH)
 	cd $(ORANGE_PATH) && git checkout master
 
+.ONESHELL:
 php7:
-	test -f $(BUILD_PATH)/php-$(PHP_VERSION).tar.gz || wget http://cn2.php.net/distributions/php-$(PHP_VERSION).tar.gz
-	test -d $(BUILD_PATH)/php-$(PHP_VERSION) || tar -zxvf php-$(PHP_VERSION).tar.gz
-	test -d $(PHP_PATH) || ( \
-	cd php-$(PHP_VERSION) &&\
-	./configure --prefix=$(PHP_PATH)/ --with-gd --enable-gd-native-ttf --with-zlib --with-mcrypt  --enable-shmop --enable-sockets --enable-wddx --enable-zip --enable-fpm --enable-mbstring --with-zlib-dir --with-bz2 --with-curl --enable-exif  --with-iconv --enable-xml --enable-inline-optimization --enable-bcmath  --with-openssl --with-gettext  --enable-session --enable-fpm --enable-intl --enable-mbstring --enable-opcache  --with-pdo-mysql --enable-mysqlnd &&\
-	make  &&\
-	make install && \
-	cp php.ini-production $(PHP_PATH)/lib/php.ini  && \
-	cp $(PHP_PATH)/etc/php-fpm.conf.default $(PHP_PATH)/etc/php-fpm.conf && \
-	cp $(PHP_PATH)/etc/php-fpm.d/www.conf.default  $(PHP_PATH)/etc/php-fpm.d/www.conf && \
-	echo "zend_extension=opcache.so" >>  $(PHP_PATH)/lib/php.ini && \
-	echo 'export PATH=$(PHP_PATH)/bin/:$$PATH' >> ~/.bashrc && source ~/.bashrc \
+	cd $(BUILD_PATH)
+	test -f php-$(PHP_VERSION).tar.gz || wget http://cn2.php.net/distributions/php-$(PHP_VERSION).tar.gz
+	test -d  php-$(PHP_VERSION) || tar -zxvf php-$(PHP_VERSION).tar.gz
+	test -d $(PHP_PATH) || (
+		cd php-$(PHP_VERSION) 
+		./configure --prefix=$(PHP_PATH)/ --with-gd --enable-gd-native-ttf --with-zlib --with-mcrypt  --enable-shmop --enable-sockets --enable-wddx --enable-zip --enable-fpm --enable-mbstring --with-zlib-dir --with-bz2 --with-curl --enable-exif  --with-iconv --enable-xml --enable-inline-optimization --enable-bcmath  --with-openssl --with-gettext  --enable-session --enable-fpm --enable-intl --enable-mbstring --enable-opcache  --with-pdo-mysql --enable-mysqlnd
+		make
+		make install 
+		cp php.ini-production $(PHP_PATH)/lib/php.ini  
+		cp $(PHP_PATH)/etc/php-fpm.conf.default $(PHP_PATH)/etc/php-fpm.conf 
+		cp $(PHP_PATH)/etc/php-fpm.d/www.conf.default  $(PHP_PATH)/etc/php-fpm.d/www.conf 
+		echo "zend_extension=opcache.so" >>  $(PHP_PATH)/lib/php.ini 
+		sudo sh -c 'echo PATH=$(PHP_PATH)/bin:$$PATH >> /etc/profile.d/devops.sh'
+		echo "exce 'source /etc/profile.d/devops.sh' or reboot" 
 	)
+
+# php7-clean:
+	# cd $(BUILD_PATH)
+	# rm -fr php-$(PHP_VERSION).tar.gz php-$(PHP_VERSION)
 
 php7-ext-stomp: php7
 	test -f 'stomp-2.0.0.tgz'||wget https://pecl.php.net/get/stomp-2.0.0.tgz
@@ -215,9 +237,7 @@ php-composer:
 	composer config -g repo.packagist composer https://packagist.phpcomposer.com
 	composer
 
-
-
-php-amqp: librabbitmq php7
+php-amqp: librabbitmq
 	test -f $(BUILD_PATH)/amqp-$(PHP_AMQP_VERSION).tgz|| wget https://pecl.php.net/get/amqp-$(PHP_AMQP_VERSION).tgz
 	test -d $(BUILD_PATH)/amqp-$(PHP_AMQP_VERSION) ||( tar -zxvf amqp-$(PHP_AMQP_VERSION).tgz  &&\
 	cd $(BUILD_PATH)/amqp-$(PHP_AMQP_VERSION) && \
@@ -248,7 +268,7 @@ librabbitmq:
 	echo $$tt1 >>  /etc/ld.so.conf.d/devpos.conf
 	sudo ldconfig
 
-update-must:
+update-make:
 	wget http://alpha.gnu.org/gnu/make/make-4.1.90.tar.gz
 	tar -zxvf make-4.1.90.tar.gz
 	cd make-4.1.90 && ./configure && make CFLAGS="-g -O2 -std=gnu99" && make install && make -v && which make
@@ -260,7 +280,7 @@ wrk:
 	sudo cp wrk /bin
 	wrk
 
-install-all: prerequisites openresty orange php7 php7-ext-stomp php7-ext-redis php7-ext-phalcon php-amqp php-composer
+# install-all: prerequisites openresty orange php7 php7-ext-stomp php7-ext-redis php7-ext-phalcon php-amqp php-composer
 
 
 update-orange: orange
