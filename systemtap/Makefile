@@ -12,6 +12,7 @@ SYSTEMTAP_VERSION ?= 3.1
 
 PHP_VERSION ?= 7.0.14
 PHP_AMQP_VERSION ?= 1.7.1
+PHP_SWOOLE_VERSION ?=2.0.7
 
 OEPNRESTY_VERSION ?= 1.11.2.2
 
@@ -34,10 +35,13 @@ echo:
 	@echo PHP_AMQP_VERSION 	  "---------" $(PHP_AMQP_VERSION)
 
 
-prerequisites:prerequisites-y
+prerequisites:prerequisites-yum
 
 prerequisites-yum:
 	mkdir -p $(SOFTWARE_PATH)
+	mkdir -p $(BUILD_PATH)
+	sudo chmod 777 -R $(BUILD_PATH)
+	
 	sudo yum install -y  \
 				readline-devel \
 				pcre-devel \
@@ -190,7 +194,7 @@ orange: lor
 	cd $(ORANGE_PATH) && git checkout master
 
 .ONESHELL:
-php7:
+php7: prerequisites
 	cd $(BUILD_PATH)
 	test -f php-$(PHP_VERSION).tar.gz || wget http://cn2.php.net/distributions/php-$(PHP_VERSION).tar.gz
 	test -d  php-$(PHP_VERSION) || tar -zxvf php-$(PHP_VERSION).tar.gz
@@ -204,14 +208,29 @@ php7:
 		cp $(PHP_PATH)/etc/php-fpm.d/www.conf.default  $(PHP_PATH)/etc/php-fpm.d/www.conf 
 		echo "zend_extension=opcache.so" >>  $(PHP_PATH)/lib/php.ini 
 		sudo sh -c 'echo PATH=$(PHP_PATH)/bin:$$PATH >> /etc/profile.d/devops.sh'
+		sudo sh -c 'echo "export PATH=$(PHP_PATH)/sbin:$$PATH" >> /etc/profile.d/devops.sh'
 		echo "exce 'source /etc/profile.d/devops.sh' or reboot" 
 	)
+
+.ONESHELL:
+php7-ext-swoole:
+	cd $(BUILD_PATH)
+	test -f v$(PHP_SWOOLE_VERSION).tar.gz || wget https://github.com/swoole/swoole-src/archive/v$(PHP_SWOOLE_VERSION).tar.gz
+	test -d swoole-src-$(PHP_SWOOLE_VERSION) || tar -zxvf v$(PHP_SWOOLE_VERSION).tar.gz
+	cd swoole-src-$(PHP_SWOOLE_VERSION)/
+	phpize
+	./configure
+	make
+	sudo make install
+	sudo sh -c 'echo "extension=swoole.so" >> $(PHP_PATH)/lib/php.ini'
+
+	# php -m
 
 # php7-clean:
 	# cd $(BUILD_PATH)
 	# rm -fr php-$(PHP_VERSION).tar.gz php-$(PHP_VERSION)
 
-php7-ext-stomp: php7
+php7-ext-stomp: 
 	test -f 'stomp-2.0.0.tgz'||wget https://pecl.php.net/get/stomp-2.0.0.tgz
 	test -d 'stomp-2.0.0' || tar -zxvf stomp-2.0.0.tgz && \
 	source ~/.bashrc && \
@@ -219,7 +238,7 @@ php7-ext-stomp: php7
 	phpize && ./configure && make && make install && \
 	echo "extension=stomp.so" >> $(PHP_PATH)/lib/php.ini
 
-php7-ext-redis: php7
+php7-ext-redis: 
 	test -f "redis.3.0.0.tar.gz" || wget https://github.com/phpredis/phpredis/archive/3.0.0.tar.gz  -O redis.3.0.0.tar.gz
 	test -d "phpredis-3.0.0" || tar -zxvf  redis.3.0.0.tar.gz && \
 	source ~/.bashrc && \
@@ -227,7 +246,7 @@ php7-ext-redis: php7
 	phpize && ./configure && make && make install && \
 	echo "extension=redis.so" >> $(PHP_PATH)/lib/php.ini
 
-php7-ext-phalcon: php7
+php7-ext-phalcon:
 	test -d "cphalcon"|| git clone git://github.com/thisverygoodhhhh/cphalcon.git && \
 	source ~/.bashrc &&\
 	echo $$PATH && \
