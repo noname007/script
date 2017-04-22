@@ -266,14 +266,14 @@ php-composer:
 php-amqp: librabbitmq
 	mkdir -p $(BUILD_PATH)
 	test -f amqp-$(PHP_AMQP_VERSION).tgz|| wget https://pecl.php.net/get/amqp-$(PHP_AMQP_VERSION).tgz
-	test -d $(BUILD_PATH)/amqp-$(PHP_AMQP_VERSION) ||( tar -zxvf amqp-$(PHP_AMQP_VERSION).tgz  &&\
-	cd $(BUILD_PATH)/amqp-$(PHP_AMQP_VERSION) && \
-	phpize  && \
-	./configure --with-amqp --with-librabbitmq-dir=/usr/local/ && \
-	make && \
-	make install &&  \
-	echo "extension=amqp.so"   >> $(PHP_PATH)/lib/php.ini && \
-	make test )\
+	test -d amqp-$(PHP_AMQP_VERSION) || tar -zxvf amqp-$(PHP_AMQP_VERSION).tgz
+	cd amqp-$(PHP_AMQP_VERSION)
+	phpize  
+	./configure --with-amqp --with-librabbitmq-dir=/usr/local/
+	make
+	make install
+	echo "extension=amqp.so"   >> $(PHP_PATH)/lib/php.ini
+	make test
 
 .ONESHELL:
 librabbitmq:
