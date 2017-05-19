@@ -185,7 +185,7 @@ openresty: prerequisites
 	patch -p1 < openssl-1.0.2h-sess_set_get_cb_yield.patch
 	test -f 'openresty-$(OEPNRESTY_VERSION).tar.gz' || wget https://openresty.org/download/openresty-$(OEPNRESTY_VERSION).tar.gz 
 	test -d 'openresty-$(OEPNRESTY_VERSION)' || tar -zxvf openresty-$(OEPNRESTY_VERSION).tar.gz 
-	test -d $(OEPNRESTY_PATH) && exit 0
+	test -d $(OEPNRESTY_PATH)
 	cd openresty-$(OEPNRESTY_VERSION) 
 	./configure --prefix=$(OEPNRESTY_PATH) --with-openssl=$(BUILD_PATH)/openssl-$(OPENSSL_VERSION) --with-debug --with-pcre-jit --with-ipv6 --with-http_gzip_static_module    --with-http_stub_status_module  --with-http_ssl_module --with-http_realip_module -j2 
 	make -j2 
