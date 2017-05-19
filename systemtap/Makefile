@@ -179,19 +179,21 @@ openresty: prerequisites
 	cd $(BUILD_PATH)
 	test -f openssl-$(OPENSSL_VERSION).tar.gz || wget https://www.openssl.org/source/openssl-$(OPENSSL_VERSION).tar.gz
 	test -d openssl-$(OPENSSL_VERSION) && rm -fr openssl-$(OPENSSL_VERSION) 
-	tar -zxvf  openssl-$(OPENSSL_VERSION).tar.gz
+	tar -zxvf  openssl-$(OPENSSL_VERSION).tar.gz > /dev/null && exit 1
 	cd openssl-$(OPENSSL_VERSION)
 	wget https://raw.githubusercontent.com/openresty/openresty/master/patches/openssl-1.0.2h-sess_set_get_cb_yield.patch
 	patch -p1 < openssl-1.0.2h-sess_set_get_cb_yield.patch
+	cd $(BUILD_PATH)
 	test -f 'openresty-$(OEPNRESTY_VERSION).tar.gz' || wget https://openresty.org/download/openresty-$(OEPNRESTY_VERSION).tar.gz 
-	test -d 'openresty-$(OEPNRESTY_VERSION)' || tar -zxvf openresty-$(OEPNRESTY_VERSION).tar.gz 
+	test -d 'openresty-$(OEPNRESTY_VERSION)'  
+	tar -zxvf openresty-$(OEPNRESTY_VERSION).tar.gz   > /dev/null && exit 1
 	test -d $(OEPNRESTY_PATH)
 	cd openresty-$(OEPNRESTY_VERSION) 
-	./configure --prefix=$(OEPNRESTY_PATH) --with-openssl=$(BUILD_PATH)/openssl-$(OPENSSL_VERSION) --with-debug --with-pcre-jit --with-ipv6 --with-http_gzip_static_module    --with-http_stub_status_module  --with-http_ssl_module --with-http_realip_module -j2 
-	make -j2 
-	sudo make install 
-	sudo sh -c 'echo PATH=$(OEPNRESTY_PATH)/bin:$$PATH >> /etc/profile.d/devops.sh && source /etc/profile.d/devops.sh' \
-	)
+	./configure --prefix=$(OEPNRESTY_PATH) --with-openssl=$(BUILD_PATH)/openssl-$(OPENSSL_VERSION) --with-debug --with-pcre-jit --with-ipv6 --with-http_gzip_static_module --with-http_stub_status_module  --with-http_ssl_module --with-http_realip_module -j2 > /dev/null && exit 1
+	make -j2 > /dev/null
+	sudo make install  > /dev/null
+	sudo sh -c 'echo PATH=$(OEPNRESTY_PATH)/bin:$$PATH >> /etc/profile.d/devops.sh && source /etc/profile.d/devops.sh'
+	
 # --with-http_ssl_module --with-http_realip_module --with-google_perftools_module --with-http_upstream_check_module --with-http_concat_module
 
 lor: openresty
