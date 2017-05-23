@@ -177,14 +177,15 @@ flamegraph:
 .ONESHELL:
 openresty: prerequisites
 	cd $(BUILD_PATH)
-	test -f openssl-$(OPENSSL_VERSION).tar.gz || wget https://www.openssl.org/source/openssl-$(OPENSSL_VERSION).tar.gz
+	echo downloading file openssl-$(OPENSSL_VERSION).tar.gz openssl-1.0.2h-sess_set_get_cb_yield.patch ...
+	test -f openssl-$(OPENSSL_VERSION).tar.gz || wget https://www.openssl.org/source/openssl-$(OPENSSL_VERSION).tar.gz  > /dev/null || exit 1
+	test -f openssl-1.0.2h-sess_set_get_cb_yield.patch || wget https://raw.githubusercontent.com/openresty/openresty/master/patches/openssl-1.0.2h-sess_set_get_cb_yield.patch > /dev/null || exit 1
 	test -d openssl-$(OPENSSL_VERSION) && rm -fr openssl-$(OPENSSL_VERSION) 
 	tar -zxvf  openssl-$(OPENSSL_VERSION).tar.gz > /dev/null || exit 1
 	cd openssl-$(OPENSSL_VERSION)
-	wget https://raw.githubusercontent.com/openresty/openresty/master/patches/openssl-1.0.2h-sess_set_get_cb_yield.patch
-	patch -p1 < openssl-1.0.2h-sess_set_get_cb_yield.patch
+	patch -p1 < ../openssl-1.0.2h-sess_set_get_cb_yield.patch
 	cd $(BUILD_PATH)
-	test -f 'openresty-$(OEPNRESTY_VERSION).tar.gz' || wget https://openresty.org/download/openresty-$(OEPNRESTY_VERSION).tar.gz 
+	test -f 'openresty-$(OEPNRESTY_VERSION).tar.gz' || wget https://openresty.org/download/openresty-$(OEPNRESTY_VERSION).tar.gz > /dev/null || exit 1
 	test -d 'openresty-$(OEPNRESTY_VERSION)'  
 	tar -zxvf openresty-$(OEPNRESTY_VERSION).tar.gz   > /dev/null ||  exit 1
 	test -d $(OEPNRESTY_PATH)
