@@ -190,10 +190,11 @@ openresty: prerequisites
 	tar -zxvf openresty-$(OEPNRESTY_VERSION).tar.gz   > /dev/null ||  exit 1
 	test -d $(OEPNRESTY_PATH)
 	cd openresty-$(OEPNRESTY_VERSION) 
-	./configure --prefix=$(OEPNRESTY_PATH) --with-openssl=$(BUILD_PATH)/openssl-$(OPENSSL_VERSION) --with-debug --with-pcre-jit --with-ipv6 --with-http_gzip_static_module --with-http_stub_status_module  --with-http_ssl_module --with-http_realip_module -j2 > /dev/null || exit 1
-	make -j2 > /dev/null
-	make install  > /dev/null
+	./configure --prefix=$(OEPNRESTY_PATH) --with-openssl=$(BUILD_PATH)/openssl-$(OPENSSL_VERSION) --with-debug --with-pcre-jit --with-ipv6 --with-http_gzip_static_module --with-http_stub_status_module  --with-http_ssl_module --with-http_realip_module -j
+	make -j
+	make install  
 	sh -c 'echo PATH=$(OEPNRESTY_PATH)/bin:$$PATH >> /etc/profile.d/devops.sh && source /etc/profile.d/devops.sh'
+	cat /etc/profile.d/devops.sh
 	
 # --with-http_ssl_module --with-http_realip_module --with-google_perftools_module --with-http_upstream_check_module --with-http_concat_module
 
