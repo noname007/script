@@ -6,6 +6,8 @@ ADD systemtap systemtap
 EXPOSE 80 7777 8888 9999
 
 RUN \
-    ls -alh / \
-    ls -alh systemtap \
-    pwd
+    ls -alh / &&\
+    ls -alh systemtap &&\
+    pwd &&\
+    cd systemtap &&  \
+    make openresty
