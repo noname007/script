@@ -1,4 +1,4 @@
-FROM ubuntu:fedora:latest
+FROM fedora:latest
 MAINTAINER soul11201 "soul11201@gmail.com"
 
 EXPOSE 7777
