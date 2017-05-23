@@ -41,9 +41,9 @@ prerequisites:prerequisites-yum
 prerequisites-yum:
 	mkdir -p $(SOFTWARE_PATH)
 	mkdir -p $(BUILD_PATH)
-	sudo chmod 777 -R $(BUILD_PATH)
+	chmod 777 -R $(BUILD_PATH)
 	
-	sudo yum install -y  \
+	yum install -y  \
 				readline-devel \
 				pcre-devel \
 				openssl-devel \
@@ -74,22 +74,22 @@ prerequisites-yum:
 				# libpng-dev 
 				# libmcrypt-dev 
 				# libjpeg-dev
-	sudo ntpdate time.nist.gov
+	ntpdate time.nist.gov
 yum-shell:
-	sudo yum install -y curl zsh fish
+	yum install -y curl zsh fish
 	sh -c "$$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
 
 deb-shell:
-	sudo apt-get install -y curl zsh fish
+	apt-get install -y curl zsh fish
 	sh -c "$$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
 
 
 fedora-systemtap:prerequisites
-	sudo yum install -y systemtap systemtap-runtime kernel-devel yum-utils  
-	sudo debuginfo-install -y kernel
+	yum install -y systemtap systemtap-runtime kernel-devel yum-utils  
+	debuginfo-install -y kernel
 
 fedora-desktop:update-hosts
-	sudo yum install chromium
+	yum install chromium
 
 check-systemtap:
 	@echo '=================================== In Ubuntu 16.04 ========================================================================================='
@@ -100,18 +100,18 @@ check-systemtap:
 	stap -c df -e 'probe syscall.* { if (target()==pid()) log(name." ".argstr) }' 
 	gcc -g -O2 system-check.c  -o a.out 
 	stap -e 'probe process("./a.out").function("main") { printf("hello\n"); }' -c "./a.out" 
-	# sudo stap -d /bin/ls --ldd -e 'probe process("ls").function("xmalloc") {print_usyms(ubacktrace())}' -c "ls /"
+	# stap -d /bin/ls --ldd -e 'probe process("ls").function("xmalloc") {print_usyms(ubacktrace())}' -c "ls /"
 
 
 update-hosts:
-	sudo wget https://raw.githubusercontent.com/racaljk/hosts/master/hosts -O /etc/hosts
+	wget https://raw.githubusercontent.com/racaljk/hosts/master/hosts -O /etc/hosts
 
 
 
 prerequisites-ubuntu:
 	mkdir -p  $(SOFTWARE_PATH)
 	# @echo $$PATH
-	@sudo apt-get  install -y \
+	@apt-get  install -y \
 				gdb    \
 				libtool    \
 				libxml2-dev    \
@@ -139,13 +139,13 @@ prerequisites-ubuntu:
 				ntpdate \
 				gettext
 #	选no,使用bash 否则无法使用source
-	sudo dpkg-reconfigure  dash 
-	sudo ntpdate time.nist.gov
+	dpkg-reconfigure  dash 
+	ntpdate time.nist.gov
 
 
 unbutu-systemtap-depdency:prerequisites-ubuntu
-	sudo apt-get install -y linux-image-`uname -r`\* linux-headers-`uname -r` 
-	sudo apt-get install -y \
+	apt-get install -y linux-image-`uname -r`\* linux-headers-`uname -r` 
+	apt-get install -y \
 			libavahi-client-dev \
 			libelf-dev \
 			libnspr4-dev \
@@ -167,7 +167,7 @@ systemtap-install:
 	tar -zxvf systemtap-$(SYSTEMTAP_VERSION).tar.gz
 	cd systemtap-3.1 &&\
 	./configure --prefix=$(SYSTEMTAP_PATH)  --disable-docs --disable-refdocs CFLAGS="-g -O2"  &&\
-	make && sudo make install
+	make && make install
 	sh -c 'echo PATH=$(SYSTEMTAP_PATH)/bin:$$PATH >> /etc/profile.d/devops.sh && source /etc/profile.d/devops.sh' &&\
 
 flamegraph:
@@ -192,15 +192,15 @@ openresty: prerequisites
 	cd openresty-$(OEPNRESTY_VERSION) 
 	./configure --prefix=$(OEPNRESTY_PATH) --with-openssl=$(BUILD_PATH)/openssl-$(OPENSSL_VERSION) --with-debug --with-pcre-jit --with-ipv6 --with-http_gzip_static_module --with-http_stub_status_module  --with-http_ssl_module --with-http_realip_module -j2 > /dev/null || exit 1
 	make -j2 > /dev/null
-	sudo make install  > /dev/null
-	sudo sh -c 'echo PATH=$(OEPNRESTY_PATH)/bin:$$PATH >> /etc/profile.d/devops.sh && source /etc/profile.d/devops.sh'
+	make install  > /dev/null
+	sh -c 'echo PATH=$(OEPNRESTY_PATH)/bin:$$PATH >> /etc/profile.d/devops.sh && source /etc/profile.d/devops.sh'
 	
 # --with-http_ssl_module --with-http_realip_module --with-google_perftools_module --with-http_upstream_check_module --with-http_concat_module
 
 lor: openresty
 	test -d lor || git clone https://github.com/thisverygoodhhhh/lor.git
 	cd lor && git pull && \
-	sudo make install
+	make install
 orange: lor
 	test -d $(ORANGE_PATH) || git clone  https://github.com/thisverygoodhhhh/orange.git $(ORANGE_PATH)
 	cd $(ORANGE_PATH) && git checkout master
@@ -219,8 +219,8 @@ php7: prerequisites
 		cp $(PHP_PATH)/etc/php-fpm.conf.default $(PHP_PATH)/etc/php-fpm.conf 
 		cp $(PHP_PATH)/etc/php-fpm.d/www.conf.default  $(PHP_PATH)/etc/php-fpm.d/www.conf 
 		echo "zend_extension=opcache.so" >>  $(PHP_PATH)/lib/php.ini 
-		sudo sh -c 'echo PATH=$(PHP_PATH)/bin:$$PATH >> /etc/profile.d/devops.sh'
-		sudo sh -c 'echo "export PATH=$(PHP_PATH)/sbin:$$PATH" >> /etc/profile.d/devops.sh'
+		sh -c 'echo PATH=$(PHP_PATH)/bin:$$PATH >> /etc/profile.d/devops.sh'
+		sh -c 'echo "export PATH=$(PHP_PATH)/sbin:$$PATH" >> /etc/profile.d/devops.sh'
 		echo "exce 'source /etc/profile.d/devops.sh' or reboot" 
 	)
 
@@ -233,8 +233,8 @@ php7-ext-swoole:
 	phpize
 	./configure
 	make
-	sudo make install
-	sudo sh -c 'echo "extension=swoole.so" >> $(PHP_PATH)/lib/php.ini'
+	make install
+	sh -c 'echo "extension=swoole.so" >> $(PHP_PATH)/lib/php.ini'
 
 	# php -m
 
@@ -290,7 +290,7 @@ php-amqp: librabbitmq
 .ONESHELL:
 librabbitmq:
 	test -d $(BUILD_PATH)/rabbitmq-c || git clone https://github.com/alanxz/rabbitmq-c.git $(BUILD_PATH)/rabbitmq-c
-	# (sudo find / -name librabbitmq.so | grep -v 'rabbitmq-c' )||
+	# (find / -name librabbitmq.so | grep -v 'rabbitmq-c' )||
 	cd $(BUILD_PATH)/rabbitmq-c/
 	git submodule init
 	git submodule update
@@ -300,12 +300,12 @@ librabbitmq:
 	mkdir -p build
 	cd build
 	cmake ..
-	sudo cmake --build .  --target install
-	tt=`sudo find / -name librabbitmq.so | grep -v 'rabbitmq-c'`
+	cmake --build .  --target install
+	tt=`find / -name librabbitmq.so | grep -v 'rabbitmq-c'`
 	tt1=$${tt:0:$${#tt}-15}
 	echo "add '$$tt1' to  /etc/ld.so.conf.d/devpos.conf"
 	echo $$tt1 >>  /etc/ld.so.conf.d/devpos.conf
-	sudo ldconfig
+	ldconfig
 
 update-make:
 	wget http://alpha.gnu.org/gnu/make/make-4.1.90.tar.gz
@@ -316,7 +316,7 @@ wrk:
 	git clone https://github.com/wg/wrk.git
 	cd wrk && \
 	make && \
-	sudo cp wrk /bin
+	cp wrk /bin
 	wrk
 
 # install-all: prerequisites openresty orange php7 php7-ext-stomp php7-ext-redis php7-ext-phalcon php-amqp php-composer
@@ -328,4 +328,4 @@ update-orange: orange
 update-lor: lor
 
 bug-fedora:
-	sudo dnf upgrade perl-libs
+	dnf upgrade perl-libs
