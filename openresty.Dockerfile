@@ -1,7 +1,11 @@
 FROM fedora:latest
 MAINTAINER soul11201 "soul11201@gmail.com"
 
-EXPOSE 7777
-EXPOSE 80
-EXPOSE 9999
+ADD systemtap systemtap
 
+EXPOSE 80 7777 8888 9999
+
+RUN \
+    ls -alh / \
+    ls -alh systemtap \
+    pwd
