@@ -1,5 +1,5 @@
 
-SOFTWARE_PATH ?= $(HOME)
+SOFTWARE_PATH ?= /data
 
 PHP_PATH ?= $(SOFTWARE_PATH)/software/php7.0.14dd
 OEPNRESTY_PATH ?= $(SOFTWARE_PATH)/software/openrestydd
@@ -42,6 +42,7 @@ prerequisites-yum:
 	mkdir -p $(SOFTWARE_PATH)
 	mkdir -p $(BUILD_PATH)
 	chmod 777 -R $(BUILD_PATH)
+	yum upgrade
 	
 	yum install -y  \
 				readline-devel \
@@ -178,22 +179,21 @@ flamegraph:
 openresty: prerequisites
 	cd $(BUILD_PATH)
 	echo downloading file openssl-$(OPENSSL_VERSION).tar.gz openssl-1.0.2h-sess_set_get_cb_yield.patch ...
-	test -f openssl-$(OPENSSL_VERSION).tar.gz || wget https://www.openssl.org/source/openssl-$(OPENSSL_VERSION).tar.gz  > /dev/null || exit 1
-	test -f openssl-1.0.2h-sess_set_get_cb_yield.patch || wget https://raw.githubusercontent.com/openresty/openresty/master/patches/openssl-1.0.2h-sess_set_get_cb_yield.patch > /dev/null || exit 1
+	test -f openssl-$(OPENSSL_VERSION).tar.gz || wget https://www.openssl.org/source/openssl-$(OPENSSL_VERSION).tar.gz 
+	test -f openssl-1.0.2h-sess_set_get_cb_yield.patch || wget https://raw.githubusercontent.com/openresty/openresty/master/patches/openssl-1.0.2h-sess_set_get_cb_yield.patch
 	test -d openssl-$(OPENSSL_VERSION) && rm -fr openssl-$(OPENSSL_VERSION) 
-	tar -zxvf  openssl-$(OPENSSL_VERSION).tar.gz > /dev/null || exit 1
+	tar -zxvf  openssl-$(OPENSSL_VERSION).tar.gz || exit 1
 	cd openssl-$(OPENSSL_VERSION)
 	patch -p1 < ../openssl-1.0.2h-sess_set_get_cb_yield.patch
 	cd $(BUILD_PATH)
-	test -f 'openresty-$(OEPNRESTY_VERSION).tar.gz' || wget https://openresty.org/download/openresty-$(OEPNRESTY_VERSION).tar.gz > /dev/null || exit 1
-	test -d 'openresty-$(OEPNRESTY_VERSION)'  
-	tar -zxvf openresty-$(OEPNRESTY_VERSION).tar.gz   > /dev/null ||  exit 1
-	test -d $(OEPNRESTY_PATH)
+	test -f 'openresty-$(OEPNRESTY_VERSION).tar.gz' || wget https://openresty.org/download/openresty-$(OEPNRESTY_VERSION).tar.gz
+	test -d 'openresty-$(OEPNRESTY_VERSION)' || tar -zxvf openresty-$(OEPNRESTY_VERSION).tar.gz
 	cd openresty-$(OEPNRESTY_VERSION) 
 	./configure --prefix=$(OEPNRESTY_PATH) --with-openssl=$(BUILD_PATH)/openssl-$(OPENSSL_VERSION) --with-debug --with-pcre-jit --with-ipv6 --with-http_gzip_static_module --with-http_stub_status_module  --with-http_ssl_module --with-http_realip_module -j
 	make -j
 	make install  
 	sh -c 'echo PATH=$(OEPNRESTY_PATH)/bin:$$PATH >> /etc/profile.d/devops.sh && source /etc/profile.d/devops.sh'
+	echo "-------------------->"
 	cat /etc/profile.d/devops.sh
 	
 # --with-http_ssl_module --with-http_realip_module --with-google_perftools_module --with-http_upstream_check_module --with-http_concat_module
