@@ -10,13 +10,14 @@ BUILD_PATH?=$(SOFTWARE_PATH)/build
 
 SYSTEMTAP_VERSION ?= 3.1
 
-PHP_VERSION ?= 7.0.14
+PHP_VERSION ?= 7.0.22
 PHP_AMQP_VERSION ?= 1.7.1
 PHP_SWOOLE_VERSION ?=2.0.7
 
 OEPNRESTY_VERSION ?= 1.11.2.4
 
 OPENSSL_VERSION?=1.0.2k
+PCRE_VERSION?=8.39
 
 export $$PATH := $(PHP_PATH)/bin:$$PATH
 export $$PATH := $(OEPNRESTY_PATH)/bin:$$PATH
@@ -36,14 +37,13 @@ echo:
 	@echo PHP_AMQP_VERSION 	  "---------" $(PHP_AMQP_VERSION)
 
 
-prerequisites:prerequisites-yum
-
-prerequisites-yum:
+prerequisites:
 	mkdir -p $(SOFTWARE_PATH)
 	mkdir -p $(BUILD_PATH)
-	chmod 777 -R $(BUILD_PATH)
+	chmod -R 777 $(BUILD_PATH)
+
+prerequisites-yum:prerequisites
 	yum upgrade
-	
 	yum install -y  \
 				readline-devel \
 				pcre-devel \
@@ -58,7 +58,7 @@ prerequisites-yum:
 				gd-devel \
 				libmcrypt-devel \
 				libcurl-devel\
-				libuuid-devel \
+				libuuid-devel                                 \
 				bzip2-devel \
 				gcc-c++ \
 				git \
@@ -109,7 +109,7 @@ update-hosts:
 
 
 
-prerequisites-ubuntu:
+prerequisites-ubuntu:prerequisites
 	mkdir -p  $(SOFTWARE_PATH)
 	# @echo $$PATH
 	@apt-get  install -y \
@@ -163,6 +163,11 @@ unbutu-systemtap-depdency:prerequisites-ubuntu
 
 deb-systemtap:unbutu-systemtap-depdency systemtap-install
 
+prerequisites-mac:
+	brew install libjpeg
+	brew install libpng
+	brew install libmcrypt
+
 systemtap-install:
 	test -f systemtap-$(SYSTEMTAP_VERSION).tar.gz ||wget https://sourceware.org/systemtap/ftp/releases/systemtap-$(SYSTEMTAP_VERSION).tar.gz 
 	tar -zxvf systemtap-$(SYSTEMTAP_VERSION).tar.gz
@@ -186,19 +191,23 @@ openresty: prerequisites
 	cd openssl-$(OPENSSL_VERSION)
 	patch -p1 < ../openssl-1.0.2h-sess_set_get_cb_yield.patch
 	cd $(BUILD_PATH)
+	wget ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre-$(PCRE_VERSION).tar.gz
+	tar -xvf pcre-$(PCRE_VERSION).tar.gz
+	cd $(BUILD_PATH)
 	test -f 'openresty-$(OEPNRESTY_VERSION).tar.gz' || wget https://openresty.org/download/openresty-$(OEPNRESTY_VERSION).tar.gz
 	test -d 'openresty-$(OEPNRESTY_VERSION)' || tar -zxvf openresty-$(OEPNRESTY_VERSION).tar.gz
 	cd openresty-$(OEPNRESTY_VERSION) 
-	./configure --prefix=$(OEPNRESTY_PATH) --with-openssl=$(BUILD_PATH)/openssl-$(OPENSSL_VERSION) --with-debug --with-pcre-jit --with-ipv6 --with-http_gzip_static_module --with-http_stub_status_module  --with-http_ssl_module --with-http_realip_module
+	./configure --prefix=$(OEPNRESTY_PATH) --with-pcre=$(BUILD_PATH)/pcre-$(PCRE_VERSION) --with-openssl=$(BUILD_PATH)/openssl-$(OPENSSL_VERSION) --with-debug --with-pcre-jit --with-ipv6 --with-http_gzip_static_module --with-http_stub_status_module  --with-http_ssl_module --with-http_realip_module
 	make -j
-	make install  
-	sh -c 'echo PATH=$(OEPNRESTY_PATH)/bin:$$PATH >> /etc/profile.d/devops.sh && source /etc/profile.d/devops.sh'
-	echo "-------------------->"
-	cat /etc/profile.d/devops.sh
-	
+	make install
+
+#	sh -c 'echo PATH=$(OEPNRESTY_PATH)/bin:$$PATH >> /etc/profile.d/devops.sh && source /etc/profile.d/devops.sh'
+#	echo "-------------------->"
+#	cat /etc/profile.d/devops.sh
+#	
 # --with-http_ssl_module --with-http_realip_module --with-google_perftools_module --with-http_upstream_check_module --with-http_concat_module
 
-lor: openresty
+lor:
 	test -d lor || git clone https://github.com/thisverygoodhhhh/lor.git
 	cd lor && git pull && \
 	make install
@@ -207,23 +216,26 @@ orange: lor
 	cd $(ORANGE_PATH) && git checkout master
 
 .ONESHELL:
-php7: prerequisites
+php7: 
 	cd $(BUILD_PATH)
 	test -f php-$(PHP_VERSION).tar.gz || wget http://cn2.php.net/distributions/php-$(PHP_VERSION).tar.gz
 	test -d  php-$(PHP_VERSION) || tar -zxvf php-$(PHP_VERSION).tar.gz
 	test -d $(PHP_PATH) || (
+		cd $(BUILD_PATH)/openssl-$(OPENSSL_VERSION)
+		make 
+		make install
 		cd php-$(PHP_VERSION) 
-		./configure --prefix=$(PHP_PATH)/ --with-gd --enable-gd-native-ttf --with-zlib --with-mcrypt  --enable-shmop --enable-sockets --enable-wddx --enable-zip --enable-fpm --enable-mbstring --with-zlib-dir --with-bz2 --with-curl --enable-exif  --with-iconv --enable-xml --enable-inline-optimization --enable-bcmath  --with-openssl --with-gettext  --enable-session --enable-fpm --enable-intl --enable-mbstring --enable-opcache  --with-pdo-mysql --enable-mysqlnd
+		./configure --prefix=$(PHP_PATH)/ --with-gd --enable-gd-native-ttf --with-zlib --with-mcrypt  --enable-shmop --enable-sockets --enable-wddx --enable-zip --enable-fpm --enable-mbstring --with-zlib-dir --with-bz2 --with-curl --enable-exif  --with-iconv --enable-xml --enable-inline-optimization --enable-bcmath  --with-openssl=$(BUILD_PATH)/openssl-$(OPENSSL_VERSION)/.openssl --enable-session --enable-fpm --enable-mbstring --enable-opcache  --with-pdo-mysql --enable-mysqlnd
 		make
 		make install 
 		cp php.ini-production $(PHP_PATH)/lib/php.ini  
 		cp $(PHP_PATH)/etc/php-fpm.conf.default $(PHP_PATH)/etc/php-fpm.conf 
 		cp $(PHP_PATH)/etc/php-fpm.d/www.conf.default  $(PHP_PATH)/etc/php-fpm.d/www.conf 
 		echo "zend_extension=opcache.so" >>  $(PHP_PATH)/lib/php.ini 
-		sh -c 'echo PATH=$(PHP_PATH)/bin:$$PATH >> /etc/profile.d/devops.sh'
-		sh -c 'echo "export PATH=$(PHP_PATH)/sbin:$$PATH" >> /etc/profile.d/devops.sh'
-		echo "exce 'source /etc/profile.d/devops.sh' or reboot" 
 	)
+		#sh -c 'echo PATH=$(PHP_PATH)/bin:$$PATH >> /etc/profile.d/devops.sh'
+		#sh -c 'echo "export PATH=$(PHP_PATH)/sbin:$$PATH" >> /etc/profile.d/devops.sh'
+		#echo "exce 'source /etc/profile.d/devops.sh' or reboot" 
 
 .ONESHELL:
 php7-ext-swoole:
