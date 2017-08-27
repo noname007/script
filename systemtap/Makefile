@@ -207,10 +207,12 @@ openresty: prerequisites
 #	
 # --with-http_ssl_module --with-http_realip_module --with-google_perftools_module --with-http_upstream_check_module --with-http_concat_module
 
+ONESHELL:
 lor:
-	test -d lor || git clone https://github.com/thisverygoodhhhh/lor.git
+	cd $(BUILD_PATH)
+	test -d lor || git clone https://github.com/sumory/lor.git
 	cd lor && git pull && \
-	make install
+	sudo make install
 orange: lor
 	test -d $(ORANGE_PATH) || git clone  https://github.com/thisverygoodhhhh/orange.git $(ORANGE_PATH)
 	cd $(ORANGE_PATH) && git checkout master
