@@ -1,5 +1,5 @@
 
-SOFTWARE_PATH ?= /data
+SOFTWARE_PATH ?= $(HOME)/data
 
 PHP_PATH ?= $(SOFTWARE_PATH)/software/php7.0.14dd
 OEPNRESTY_PATH ?= $(SOFTWARE_PATH)/software/openrestydd
@@ -227,7 +227,7 @@ php7:
 		make 
 		make install
 		cd php-$(PHP_VERSION) 
-		./configure --prefix=$(PHP_PATH)/ --with-gd --enable-gd-native-ttf --with-zlib --with-mcrypt  --enable-shmop --enable-sockets --enable-wddx --enable-zip --enable-fpm --enable-mbstring --with-zlib-dir --with-bz2 --with-curl --enable-exif  --with-iconv --enable-xml --enable-inline-optimization --enable-bcmath  --with-openssl=$(BUILD_PATH)/openssl-$(OPENSSL_VERSION)/.openssl --enable-session --enable-fpm --enable-mbstring --enable-opcache  --with-pdo-mysql --enable-mysqlnd
+		./configure --prefix=$(PHP_PATH)/ --with-debug  --with-gd --enable-gd-native-ttf --with-zlib --with-mcrypt  --enable-shmop --enable-sockets --enable-wddx --enable-zip --enable-fpm --enable-mbstring --with-zlib-dir --with-bz2 --with-curl --enable-exif  --with-iconv --enable-xml --enable-inline-optimization --enable-bcmath  --with-openssl=$(BUILD_PATH)/openssl-$(OPENSSL_VERSION)/.openssl --enable-session --enable-fpm --enable-mbstring --enable-opcache  --with-pdo-mysql --enable-mysqlnd
 		make
 		make install 
 		cp php.ini-production $(PHP_PATH)/lib/php.ini  
