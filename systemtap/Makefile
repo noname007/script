@@ -192,7 +192,7 @@ openresty: prerequisites
 	patch -p1 < ../openssl-1.0.2h-sess_set_get_cb_yield.patch
 	cd $(BUILD_PATH)
 	wget ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre-$(PCRE_VERSION).tar.gz
-	tar -xvf pcre-$(PCRE_VERSION).tar.gz
+	test -f pcre-$(PCRE_VERSION).tar.gz || tar -xvf pcre-$(PCRE_VERSION).tar.gz
 	cd $(BUILD_PATH)
 	test -f 'openresty-$(OEPNRESTY_VERSION).tar.gz' || wget https://openresty.org/download/openresty-$(OEPNRESTY_VERSION).tar.gz
 	test -d 'openresty-$(OEPNRESTY_VERSION)' || tar -zxvf openresty-$(OEPNRESTY_VERSION).tar.gz
@@ -206,7 +206,17 @@ openresty: prerequisites
 #	cat /etc/profile.d/devops.sh
 #	
 # --with-http_ssl_module --with-http_realip_module --with-google_perftools_module --with-http_upstream_check_module --with-http_concat_module
-
+.ONESHELL:
+luarocks:
+	cd $(BUILD_PATH)
+	test -f luarocks-2.4.3.tar.gz || wget http://luarocks.github.io/luarocks/releases/luarocks-2.4.3.tar.gz
+	tar -zxvf luarocks-2.4.3.tar.gz
+	cd luarocks-2.4.3
+	./configure  --lua-suffix=jit --with-lua-include=$(OEPNRESTY_PATH)/luajit/include/luajit-2.1
+	make build
+	make install
+	luarocks install lua-resty-http
+	
 ONESHELL:
 lor:
 	cd $(BUILD_PATH)
