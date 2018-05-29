@@ -1,7 +1,6 @@
 
 SOFTWARE_PATH ?= $(HOME)/data
 
-PHP_PATH ?= $(SOFTWARE_PATH)/software/php7.0.14dd
 OEPNRESTY_PATH ?= $(SOFTWARE_PATH)/software/openrestydd
 ORANGE_PATH ?= $(SOFTWARE_PATH)/software/orangedd
 SYSTEMTAP_PATH ?= $(SOFTWARE_PATH)/software/stap
@@ -14,6 +13,8 @@ PHP_VERSION ?= 7.0.22
 PHP_AMQP_VERSION ?= 1.7.1
 PHP_SWOOLE_VERSION ?=2.0.7
 
+PHP_PATH ?= $(SOFTWARE_PATH)/software/php/$(PHP_VERSION)
+
 OEPNRESTY_VERSION ?= 1.13.6.1
 
 OPENSSL_VERSION?=1.0.2k
@@ -25,13 +26,13 @@ export $$PATH := $(OEPNRESTY_PATH)/bin:$$PATH
 .ONESHELL:
 echo:
 	echo $$PATH
-	@echo SOFTWARE_PATH 		  "---------" $(SOFTWARE_PATH)
+	@echo SOFTWARE_PATH 	  "---------" $(SOFTWARE_PATH)
 	@echo PHP_PATH 			  "---------" $(PHP_PATH)
 	@echo OEPNRESTY_PATH 	  "---------" $(OEPNRESTY_PATH)
 	@echo ORANGE_PATH 		  "---------" $(ORANGE_PATH)
 	@echo SYSTEMTAP_PATH 	  "---------" $(SYSTEMTAP_PATH)
 	@echo FLAMEGRAPH_PATH 	  "---------" $(FLAMEGRAPH_PATH)
-	@echo SYSTEMTAP_VERSION 	  "---------" $(SYSTEMTAP_VERSION)
+	@echo SYSTEMTAP_VERSION   "---------" $(SYSTEMTAP_VERSION)
 	@echo BUILD_PATH 		  "---------" $(BUILD_PATH)
 	@echo PHP_VERSION 		  "---------" $(PHP_VERSION)
 	@echo PHP_AMQP_VERSION 	  "---------" $(PHP_AMQP_VERSION)
@@ -75,7 +76,7 @@ prerequisites-yum:prerequisites
 				# libpng-dev 
 				# libmcrypt-dev 
 				# libjpeg-dev
-	ntpdate time.nist.gov
+	# ntpdate time.nist.gov
 yum-shell:
 	yum install -y curl zsh fish
 	sh -c "$$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
@@ -141,7 +142,7 @@ prerequisites-ubuntu:prerequisites
 				gettext
 #	选no,使用bash 否则无法使用source
 	dpkg-reconfigure  dash 
-	ntpdate time.nist.gov
+	# ntpdate time.nist.gov
 
 
 unbutu-systemtap-depdency:prerequisites-ubuntu
@@ -191,8 +192,8 @@ openresty: prerequisites
 	cd openssl-$(OPENSSL_VERSION)
 	patch -p1 < ../openssl-1.0.2h-sess_set_get_cb_yield.patch
 	cd $(BUILD_PATH)
-	wget ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre-$(PCRE_VERSION).tar.gz
-	test -f pcre-$(PCRE_VERSION).tar.gz || tar -xvf pcre-$(PCRE_VERSION).tar.gz
+	test -f pcre-$(PCRE_VERSION).tar.gz || wget ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre-$(PCRE_VERSION).tar.gz
+	tar -xvf pcre-$(PCRE_VERSION).tar.gz
 	cd $(BUILD_PATH)
 	test -f 'openresty-$(OEPNRESTY_VERSION).tar.gz' || wget https://openresty.org/download/openresty-$(OEPNRESTY_VERSION).tar.gz
 	test -d 'openresty-$(OEPNRESTY_VERSION)' || tar -zxvf openresty-$(OEPNRESTY_VERSION).tar.gz
@@ -233,11 +234,9 @@ php7:
 	test -f php-$(PHP_VERSION).tar.gz || wget http://cn2.php.net/distributions/php-$(PHP_VERSION).tar.gz
 	test -d  php-$(PHP_VERSION) || tar -zxvf php-$(PHP_VERSION).tar.gz
 	test -d $(PHP_PATH) || (
-		cd $(BUILD_PATH)/openssl-$(OPENSSL_VERSION)
-		make 
-		make install
-		cd php-$(PHP_VERSION) 
-		./configure --prefix=$(PHP_PATH)/ --with-debug  --with-gd --enable-gd-native-ttf --with-zlib --with-mcrypt  --enable-shmop --enable-sockets --enable-wddx --enable-zip --enable-fpm --enable-mbstring --with-zlib-dir --with-bz2 --with-curl --enable-exif  --with-iconv --enable-xml --enable-inline-optimization --enable-bcmath  --with-openssl=$(BUILD_PATH)/openssl-$(OPENSSL_VERSION)/.openssl --enable-session --enable-fpm --enable-mbstring --enable-opcache  --with-pdo-mysql --enable-mysqlnd
+		test -d $(BUILD_PATH)/openssl-$(OPENSSL_VERSION) || (cd $(BUILD_PATH)/openssl-$(OPENSSL_VERSION) && make && make install)
+		cd $(BUILD_PATH)/php-$(PHP_VERSION) 
+		./configure --prefix=$(PHP_PATH)/ --with-debug  --with-gd --enable-gd-native-ttf --with-zlib --with-mcrypt  --enable-shmop --enable-sockets --enable-wddx --enable-zip --enable-fpm --enable-mbstring --with-zlib-dir --with-bz2 --with-curl --enable-exif  --with-iconv=/usr/local/opt/libiconv/  --enable-xml --enable-inline-optimization --enable-bcmath  --with-openssl=$(BUILD_PATH)/openssl-$(OPENSSL_VERSION)/.openssl --enable-session --enable-fpm --enable-mbstring --enable-opcache  --with-pdo-mysql --enable-mysqlnd
 		make
 		make install 
 		cp php.ini-production $(PHP_PATH)/lib/php.ini  
