@@ -236,7 +236,7 @@ php7:
 	test -d $(PHP_PATH) || (
 		test -d $(BUILD_PATH)/openssl-$(OPENSSL_VERSION)/.openssl || (cd $(BUILD_PATH)/openssl-$(OPENSSL_VERSION) && make && make install)
 		cd $(BUILD_PATH)/php-$(PHP_VERSION) 
-		./configure --prefix=$(PHP_PATH)/ --with-debug  --with-gd --enable-gd-native-ttf --with-zlib --with-mcrypt  --enable-shmop --enable-sockets --enable-wddx --enable-zip --enable-fpm --enable-mbstring --with-zlib-dir --with-bz2 --with-curl --enable-exif  --with-iconv=/usr/local/opt/libiconv/  --enable-xml --enable-inline-optimization --enable-bcmath  --with-openssl=$(BUILD_PATH)/openssl-$(OPENSSL_VERSION)/.openssl --enable-session --enable-fpm --enable-mbstring --enable-opcache  --with-pdo-mysql --enable-mysqlnd
+		./configure --prefix=$(PHP_PATH)/ --with-debug  --with-gd --enable-gd-native-ttf --with-zlib --with-mcrypt  --enable-shmop --enable-sockets --enable-wddx --enable-zip --enable-fpm --enable-mbstring --with-zlib-dir --with-bz2 --with-curl --enable-exif   --enable-xml --enable-inline-optimization --enable-bcmath  --with-openssl=$(BUILD_PATH)/openssl-$(OPENSSL_VERSION)/.openssl --enable-session --enable-fpm --enable-mbstring --enable-opcache  --with-pdo-mysql --enable-mysqlnd
 		make
 		make install 
 		cp php.ini-production $(PHP_PATH)/lib/php.ini  
