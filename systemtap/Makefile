@@ -106,7 +106,7 @@ check-systemtap:
 
 
 update-hosts:
-	wget https://raw.githubusercontent.com/racaljk/hosts/master/hosts -O /etc/hosts
+	wget -c https://raw.githubusercontent.com/racaljk/hosts/master/hosts -O /etc/hosts
 
 
 
@@ -170,7 +170,7 @@ prerequisites-mac:
 	brew install libmcrypt
 
 systemtap-install:
-	test -f systemtap-$(SYSTEMTAP_VERSION).tar.gz ||wget https://sourceware.org/systemtap/ftp/releases/systemtap-$(SYSTEMTAP_VERSION).tar.gz 
+	wget -c https://sourceware.org/systemtap/ftp/releases/systemtap-$(SYSTEMTAP_VERSION).tar.gz 
 	tar -zxvf systemtap-$(SYSTEMTAP_VERSION).tar.gz
 	cd systemtap-3.1 &&\
 	./configure --prefix=$(SYSTEMTAP_PATH)  --disable-docs --disable-refdocs CFLAGS="-g -O2"  &&\
@@ -185,17 +185,17 @@ flamegraph:
 openresty: prerequisites
 	cd $(BUILD_PATH)
 	echo downloading file openssl-$(OPENSSL_VERSION).tar.gz openssl-1.0.2h-sess_set_get_cb_yield.patch ...
-	test -f openssl-$(OPENSSL_VERSION).tar.gz || wget https://www.openssl.org/source/openssl-$(OPENSSL_VERSION).tar.gz 
-	test -f openssl-1.0.2h-sess_set_get_cb_yield.patch || wget https://raw.githubusercontent.com/openresty/openresty/master/patches/openssl-1.0.2h-sess_set_get_cb_yield.patch
+	wget -c https://www.openssl.org/source/openssl-$(OPENSSL_VERSION).tar.gz 
+	wget -c https://raw.githubusercontent.com/openresty/openresty/master/patches/openssl-1.0.2h-sess_set_get_cb_yield.patch
 	test -d openssl-$(OPENSSL_VERSION) && rm -fr openssl-$(OPENSSL_VERSION) 
 	tar -zxvf  openssl-$(OPENSSL_VERSION).tar.gz || exit 1
 	cd openssl-$(OPENSSL_VERSION)
 	patch -p1 < ../openssl-1.0.2h-sess_set_get_cb_yield.patch
 	cd $(BUILD_PATH)
-	test -f pcre-$(PCRE_VERSION).tar.gz || wget ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre-$(PCRE_VERSION).tar.gz
+	wget -c ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre-$(PCRE_VERSION).tar.gz
 	tar -xvf pcre-$(PCRE_VERSION).tar.gz
 	cd $(BUILD_PATH)
-	test -f 'openresty-$(OEPNRESTY_VERSION).tar.gz' || wget https://openresty.org/download/openresty-$(OEPNRESTY_VERSION).tar.gz
+	wget -c https://openresty.org/download/openresty-$(OEPNRESTY_VERSION).tar.gz
 	test -d 'openresty-$(OEPNRESTY_VERSION)' || tar -zxvf openresty-$(OEPNRESTY_VERSION).tar.gz
 	cd openresty-$(OEPNRESTY_VERSION) 
 	./configure --prefix=$(OEPNRESTY_PATH) --with-pcre=$(BUILD_PATH)/pcre-$(PCRE_VERSION) --with-openssl=$(BUILD_PATH)/openssl-$(OPENSSL_VERSION) --with-debug --with-pcre-jit --with-ipv6 --with-http_gzip_static_module --with-http_stub_status_module  --with-http_ssl_module --with-http_realip_module
@@ -210,7 +210,7 @@ openresty: prerequisites
 .ONESHELL:
 luarocks:
 	cd $(BUILD_PATH)
-	test -f luarocks-2.4.3.tar.gz || wget http://luarocks.github.io/luarocks/releases/luarocks-2.4.3.tar.gz
+	wget -c  http://luarocks.github.io/luarocks/releases/luarocks-2.4.3.tar.gz
 	tar -zxvf luarocks-2.4.3.tar.gz
 	cd luarocks-2.4.3
 	./configure  --lua-suffix=jit --with-lua-include=$(OEPNRESTY_PATH)/luajit/include/luajit-2.1
@@ -231,7 +231,7 @@ orange: lor
 .ONESHELL:
 php7: 
 	cd $(BUILD_PATH)
-	test -f php-$(PHP_VERSION).tar.gz || wget http://cn2.php.net/distributions/php-$(PHP_VERSION).tar.gz
+	wget -c http://cn2.php.net/distributions/php-$(PHP_VERSION).tar.gz
 	test -d  php-$(PHP_VERSION) || tar -zxvf php-$(PHP_VERSION).tar.gz
 	test -d $(PHP_PATH) || (
 		test -d $(BUILD_PATH)/openssl-$(OPENSSL_VERSION)/.openssl || (cd $(BUILD_PATH)/openssl-$(OPENSSL_VERSION) && make && make install)
@@ -251,7 +251,7 @@ php7:
 .ONESHELL:
 php7-ext-swoole:
 	cd $(BUILD_PATH)
-	test -f v$(PHP_SWOOLE_VERSION).tar.gz || wget https://github.com/swoole/swoole-src/archive/v$(PHP_SWOOLE_VERSION).tar.gz
+	wget -c  https://github.com/swoole/swoole-src/archive/v$(PHP_SWOOLE_VERSION).tar.gz
 	test -d swoole-src-$(PHP_SWOOLE_VERSION) || tar -zxvf v$(PHP_SWOOLE_VERSION).tar.gz
 	cd swoole-src-$(PHP_SWOOLE_VERSION)/
 	phpize
@@ -267,7 +267,7 @@ php7-ext-swoole:
 	# rm -fr php-$(PHP_VERSION).tar.gz php-$(PHP_VERSION)
 
 php7-ext-stomp: 
-	test -f 'stomp-2.0.0.tgz'||wget https://pecl.php.net/get/stomp-2.0.0.tgz
+	wget -c  https://pecl.php.net/get/stomp-2.0.0.tgz
 	test -d 'stomp-2.0.0' || tar -zxvf stomp-2.0.0.tgz && \
 	source ~/.bashrc && \
 	cd stomp-2.0.0 && \
@@ -275,7 +275,7 @@ php7-ext-stomp:
 	echo "extension=stomp.so" >> $(PHP_PATH)/lib/php.ini
 
 php7-ext-redis: 
-	test -f "redis.3.0.0.tar.gz" || wget https://github.com/phpredis/phpredis/archive/3.0.0.tar.gz  -O redis.3.0.0.tar.gz
+	wget -c  https://github.com/phpredis/phpredis/archive/3.0.0.tar.gz  -O redis.3.0.0.tar.gz
 	test -d "phpredis-3.0.0" || tar -zxvf  redis.3.0.0.tar.gz && \
 	source ~/.bashrc && \
 	cd phpredis-3.0.0 &&\
@@ -291,7 +291,7 @@ php7-ext-phalcon:
 	echo "extension=phalcon.so"   >> $(PHP_PATH)/lib/php.ini
 
 php-composer:
-	test -d "composer.phar" || wget https://getcomposer.org/download/1.3.2/composer.phar
+	wget -c  https://getcomposer.org/download/1.3.2/composer.phar
 	chmod +x composer.phar 
 	cp composer.phar /bin/composer
 	mv composer.phar /usr/local/bin/composer
@@ -301,7 +301,7 @@ php-composer:
 .ONESHELL:
 php-amqp: librabbitmq
 	mkdir -p $(BUILD_PATH)
-	test -f amqp-$(PHP_AMQP_VERSION).tgz|| wget https://pecl.php.net/get/amqp-$(PHP_AMQP_VERSION).tgz
+	wget -c  https://pecl.php.net/get/amqp-$(PHP_AMQP_VERSION).tgz
 	test -d amqp-$(PHP_AMQP_VERSION) || tar -zxvf amqp-$(PHP_AMQP_VERSION).tgz
 	cd amqp-$(PHP_AMQP_VERSION)
 	phpize  
@@ -332,7 +332,7 @@ librabbitmq:
 	ldconfig
 
 update-make:
-	wget http://alpha.gnu.org/gnu/make/make-4.1.90.tar.gz
+	wget -c http://alpha.gnu.org/gnu/make/make-4.1.90.tar.gz
 	tar -zxvf make-4.1.90.tar.gz
 	cd make-4.1.90 && ./configure && make CFLAGS="-g -O2 -std=gnu99" && make install && make -v && which make
 
